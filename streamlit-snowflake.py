@@ -32,7 +32,7 @@ with st.sidebar:
 
 # Store LLM-generated responses
 if "messages" not in st.session_state.keys():
-    st.session_state.messages = [{"role": "assistant", "content": "Hi. I'm Arctic, a new, efficient, intelligent, and truly open language model created by Snowflake AI Research. Ask me anything."}]
+    st.session_state.messages = [{"role": "assistant", "content": "Hi. I'm a language model trained to be your personal chef! Ask me about any recipe or anything food related."}]
 
 # Display or clear chat messages
 for message in st.session_state.messages:
@@ -40,7 +40,7 @@ for message in st.session_state.messages:
         st.write(message["content"])
 
 def clear_chat_history():
-    st.session_state.messages = [{"role": "assistant", "content": "Hi. I'm Arctic, a new, efficient, intelligent, and truly open language model created by Snowflake AI Research. Ask me anything."}]
+    st.session_state.messages = [{"role": "assistant", "content": "Hi. I'm a language model trained to be your personal chef! Ask me about any recipe or anything food related."}]
 st.sidebar.button('Clear chat history', on_click=clear_chat_history)
 
 st.sidebar.caption('Built by [Snowflake](https://snowflake.com/) to demonstrate [Snowflake Arctic](https://www.snowflake.com/blog/arctic-open-and-efficient-foundation-language-models-snowflake). App hosted on [Streamlit Community Cloud](https://streamlit.io/cloud). Model hosted by [Replicate](https://replicate.com/snowflake/snowflake-arctic-instruct).')

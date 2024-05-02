@@ -112,7 +112,7 @@ def generate_arctic_response():
         yield str(event)
 
 # User-provided prompt
-prompt = st.chat_message(disabled=not replicate_api, label="Enter your ingredients here")
+prompt = st.chat_input(disabled=not replicate_api, placeholder="Enter your ingredients here")
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     with container:

@@ -59,6 +59,7 @@ for message in st.session_state.messages:
 
 def clear_chat_history():
     st.session_state.messages = [{"role": "assistant", "content": start_message}]
+    st.text_area.value = ""
 st.sidebar.button('Clear chat', on_click=clear_chat_history)
 
 st.sidebar.divider()
@@ -112,7 +113,8 @@ def generate_arctic_response():
         yield str(event)
 
 # User-provided prompt
-if prompt := st.text_area(disabled=not replicate_api, label="Enter your ingredients here"):
+prompt = st.text_area(disabled=not replicate_api, label="Enter your ingredients here")
+if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     with container:
         with st.chat_message("user", avatar="👨‍🍳"):

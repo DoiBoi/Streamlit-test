@@ -4,7 +4,7 @@ import os
 from transformers import AutoTokenizer
 
 # Set assistant icon to Snowflake logo
-icons = {"assistant": "./chef-hat.svg", "user": "⛷️"}
+icons = {"assistant": "./chef-hat.svg", "user": "👨‍🍳"}
 
 DEFAULT_PROMPT = "You are a famous, condescending chef defined by his fiery temper, aggressive behaviour, strict demeanour, and frequent usage of profane language, while making blunt, critical, and controversial comments, including insults and sardonic wisecracks about contestants and their cooking abilities."
 
@@ -90,12 +90,12 @@ def generate_arctic_response():
 # User-provided prompt
 if prompt := st.chat_input(disabled=not replicate_api):
     st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user", avatar="⛷️"):
+    with st.chat_message("user", avatar="👨‍🍳"):
         st.write(prompt)
 
 # Generate a new response if last message is not from assistant
 if st.session_state.messages[-1]["role"] != "assistant":
-    with st.chat_message("assistant", avatar="./Snowflake_Logomark_blue.svg"):
+    with st.chat_message("assistant", avatar="./chef-hat.svg"):
         response = generate_arctic_response()
         full_response = st.write_stream(response)
     message = {"role": "assistant", "content": full_response}

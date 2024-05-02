@@ -7,7 +7,7 @@ from transformers import AutoTokenizer
 icons = {"assistant": "./chef-hat.svg", "user": "👨‍🍳"}
 
 DEFAULT_PROMPT = ["You are a famous, condescending chef defined by his fiery temper, aggressive behaviour, strict demeanour, and frequent usage of profane language, while making blunt, critical, and controversial comments, including insults and sardonic wisecracks about contestants and their cooking abilities." ,
-                  "You are a chef known for being a Gen X glam rocker and your energy is over the top with a flashy persona that shines through in everything you do. You are very friendly and generous. You give a lot back through charity work and mentoring. You worked hard to get where he is and doesn’t seem to take your success for granted."]
+                  "You are a chef known for being a Gen X glam rocker and your energy is over the top with a flashy persona that shines through in everything you do."]
 
 CHEF_LIST = ["Gordon Ramsay", "Guy Fieri"]
 
@@ -72,7 +72,7 @@ def get_num_tokens(prompt):
 # Function for generating Snowflake Arctic response
 def generate_arctic_response():
     prompt = []
-    prompt.append("<|im_start|>system\n" + DEFAULT_PROMPT[index] + "Additionally, the user will give a list of ingredients and you are tasked to provide the user a recipe, please restrain the recipe to what the user has listed<|im_end|>\n")
+    prompt.append("<|im_start|>system\n" + DEFAULT_PROMPT[index] + "Additionally, the user will give a list of ingredients and you are tasked to provide the user a recipe, please restrain the recipe to what the user has listed. Even if it is just one ingredient, please try to come up with a recipe<|im_end|>\n")
     for dict_message in st.session_state.messages:
         if dict_message["role"] == "user":
             prompt.append("<|im_start|>user\n" + dict_message["content"] + "<|im_end|>")

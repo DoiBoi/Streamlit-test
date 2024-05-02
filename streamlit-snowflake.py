@@ -58,15 +58,15 @@ for message in st.session_state.messages:
 
 def clear_chat_history():
     st.session_state.messages = [{"role": "assistant", "content": start_message}]
-st.sidebar.button('Clear chat', on_click=clear_chat_history)
+st.sidebar.button(':red[Clear chat]', on_click=clear_chat_history)
 
 st.sidebar.divider()
 
-st.sidebar.caption(':red[_For any health-related concerns, including allergy information, please consult a qualified medical expert or your personal physician. Never rely solely on the advice of an AI language model for matters concerning your well-being._]')
 
 st.sidebar.caption('This chat bot is designed to give you recipe suggestions based on ingredients you have. To use it, write each of your ingredients separated by commas.')
 st.sidebar.caption("Here's an example message:")
 st.sidebar.caption("""Egg, flour, milk, vanilla extract, baking soda, baking powder, butter, sugar, salt.""")
+st.sidebar.caption(':red[_For any health-related concerns, including allergy information, please consult a qualified medical expert or your personal physician. Never rely solely on the advice of an AI language model for matters concerning your well-being._]')
 
 st.sidebar.divider()
 
@@ -102,7 +102,7 @@ def generate_arctic_response():
 
     if get_num_tokens(prompt_str) >= 3072:
         st.error("Conversation length too long. Please keep it under 3072 tokens.")
-        st.button('Clear chat', on_click=clear_chat_history, key="clear_chat_history")
+        st.button(':red[Clear chat]', on_click=clear_chat_history, key="clear_chat_history")
         st.stop()
 
     for event in replicate.stream("snowflake/snowflake-arctic-instruct",

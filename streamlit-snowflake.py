@@ -6,7 +6,7 @@ from transformers import AutoTokenizer
 # Set assistant icon to Snowflake logo
 icons = {"assistant": "./Snowflake_Logomark_blue.svg", "user": "⛷️"}
 
-DEFAULT_PROMPT = "You are a famous, condescending chef that likes do look down on other people but you are still willing to help people"
+DEFAULT_PROMPT = "You are a famous, condescending chef defined by his fiery temper, aggressive behaviour, strict demeanour, and frequent usage of profane language, while making blunt, critical, and controversial comments, including insults and sardonic wisecracks about contestants and their cooking abilities."
 
 # App title
 st.set_page_config(page_title="Snowflake Arctic")

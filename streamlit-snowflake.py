@@ -50,8 +50,9 @@ if "messages" not in st.session_state.keys():
 
 # Display or clear chat messages
 for message in st.session_state.messages:
-    with st.chat_message(message["role"], avatar=icons[message["role"]]):
-        st.write(message["content"])
+    with st.container():
+        with st.chat_message(message["role"], avatar=icons[message["role"]]):
+            st.write(message["content"])
 
 def clear_chat_history():
     st.session_state.messages = [{"role": "assistant", "content": start_message}]
@@ -96,7 +97,7 @@ def generate_arctic_response():
 
     if get_num_tokens(prompt_str) >= 3072:
         st.error("Conversation length too long. Please keep it under 3072 tokens.")
-        st.button('Clear chat history', on_click=clear_chat_history, key="clear_chat_history")
+        st.button('Clear chat', on_click=clear_chat_history, key="clear_chat_history")
         st.stop()
 
     for event in replicate.stream("snowflake/snowflake-arctic-instruct",
@@ -110,13 +111,15 @@ def generate_arctic_response():
 # User-provided prompt
 if prompt := st.text_area(disabled=not replicate_api, label="Enter your ingredients here"):
     st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user", avatar="👨‍🍳"):
-        st.write(prompt)
+    with st.container():
+        with st.chat_message("user", avatar="👨‍🍳"):
+            st.write(prompt)
 
 # Generate a new response if last message is not from assistant
 if st.session_state.messages[-1]["role"] != "assistant":
-    with st.chat_message("assistant", avatar="./chef-hat.svg"):
-        response = generate_arctic_response()
-        full_response = st.write_stream(response)
+    with st.container():
+        with st.chat_message("assistant", avatar="./chef-hat.svg"):
+            response = generate_arctic_response()
+            full_response = st.write_stream(response)
     message = {"role": "assistant", "content": full_response}
     st.session_state.messages.append(message)

@@ -12,7 +12,7 @@ DEFAULT_PROMPT = ["You are a famous, condescending chef defined by his fiery tem
 CHEF_LIST = ["Gordon Ramsay", "Guy Fieri"]
 
 # App title
-st.set_page_config(page_title="Your personal chef")
+st.set_page_config(page_title="Personal Chef")
 
 # Replicate Credentials
 with st.sidebar:
@@ -29,15 +29,19 @@ with st.sidebar:
         #    st.success('API token loaded!', icon='✅')
 
     os.environ['REPLICATE_API_TOKEN'] = replicate_api
+
+    #! We remove these sliders and headings later once we tune it
     st.subheader("Adjust model parameters")
-    temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=5.0, value=0.3, step=0.01)
-    top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.9, step=0.01)
+    temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=5.0, value=0.2, step=0.01)
+    top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.1, step=0.01)
     option = st.sidebar.selectbox('Please select a chef:', CHEF_LIST)
     index = CHEF_LIST.index(option)
 
+start_message = "Hi. I'm an language model trained to be your personal chef! Ask me about any recipe or anything food related."
+
 # Store LLM-generated responses
 if "messages" not in st.session_state.keys():
-    st.session_state.messages = [{"role": "assistant", "content": "Hi. I'm a language model trained to be your personal chef! Ask me about any recipe or anything food related."}]
+    st.session_state.messages = [{"role": "assistant", "content": start_message}]
 
 # Display or clear chat messages
 for message in st.session_state.messages:
@@ -45,8 +49,8 @@ for message in st.session_state.messages:
         st.write(message["content"])
 
 def clear_chat_history():
-    st.session_state.messages = [{"role": "assistant", "content": "Hi. I'm a language model trained to be your personal chef! Ask me about any recipe or anything food related."}]
-st.sidebar.button('Clear chat history', on_click=clear_chat_history)
+    st.session_state.messages = [{"role": "assistant", "content": start_message}]
+st.sidebar.button('Clear chat', on_click=clear_chat_history)
 
 st.sidebar.caption('Built by [Snowflake](https://snowflake.com/) to demonstrate [Snowflake Arctic](https://www.snowflake.com/blog/arctic-open-and-efficient-foundation-language-models-snowflake). App hosted on [Streamlit Community Cloud](https://streamlit.io/cloud). Model hosted by [Replicate](https://replicate.com/snowflake/snowflake-arctic-instruct).')
 
@@ -74,11 +78,11 @@ def generate_arctic_response():
             prompt.append("<|im_start|>user\n" + dict_message["content"] + "<|im_end|>")
         else:
             prompt.append("<|im_start|>assistant\n" + dict_message["content"] + "<|im_end|>")
-    
+
     prompt.append("<|im_start|>assistant")
     prompt.append("")
     prompt_str = "\n".join(prompt)
-    
+
     if get_num_tokens(prompt_str) >= 3072:
         st.error("Conversation length too long. Please keep it under 3072 tokens.")
         st.button('Clear chat history', on_click=clear_chat_history, key="clear_chat_history")

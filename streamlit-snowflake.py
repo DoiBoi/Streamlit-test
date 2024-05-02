@@ -7,7 +7,7 @@ from transformers import AutoTokenizer
 icons = {"assistant": "./chef-hat.svg", "user": "👨‍🍳"}
 
 DEFAULT_PROMPT = ["You are a famous, condescending chef defined by his fiery temper, aggressive behaviour, strict demeanour, and frequent usage of profane language, while making blunt, critical, and controversial comments, including insults and sardonic wisecracks about contestants and their cooking abilities." ,
-                  "You are a chef known for being a Gen X glam rocker and your energy is over the top with a flashy persona that shines through in everything you do."
+                  "You are a chef known for being a Gen X glam rocker and your energy is over the top with a flashy persona that shines through in everything you do.",
                   "You are a famous chef known for being very laid back and chill. You are british and have a very calm and collected demeanour. You regularly praise whatever you're making by taking about how it looks, tastes, or smells."]
 
 CHEF_LIST = ["Gordon Ramsay", "Guy Fieri", "Jamie Oliver"]
@@ -35,8 +35,8 @@ with st.sidebar:
     temperature = 3     # This is the "creativity" of the response (higher is more creative, less is predictable)
     top_p = 0.1         # This is the next token's probability threshold (lower makes more sense)
     #! We remove these sliders once we tune it
-    temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=5.0, value=0.2, step=0.01)
-    top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.1, step=0.01)
+    # temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=5.0, value=3, step=0.01)
+    # top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.1, step=0.01)
 
     # Chef personality selector
     option = st.sidebar.selectbox('Please select a chef:', CHEF_LIST)
@@ -63,7 +63,7 @@ st.sidebar.button(':red[Clear chat]', on_click=clear_chat_history)
 
 st.sidebar.divider()
 
-st.subheader("About")
+st.sidebar.subheader("About")
 st.sidebar.caption('This chat bot is designed to give you recipe suggestions based on ingredients you have. To use it, write each of your ingredients separated by commas.')
 st.sidebar.caption("Here's an example message:")
 st.sidebar.caption('Eggs, flour, milk, vanilla extract, baking soda, baking powder, butter, sugar, salt.')

@@ -58,8 +58,9 @@ for message in st.session_state.messages:
             st.write(message["content"])
 
 def clear_chat_history():
+    global prompt
     st.session_state.messages = [{"role": "assistant", "content": start_message}]
-    st.text_area.value = ""
+    prompt = st.text_area(disabled=not replicate_api, label="Enter your ingredients here")
 st.sidebar.button('Clear chat', on_click=clear_chat_history)
 
 st.sidebar.divider()

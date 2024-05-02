@@ -12,7 +12,7 @@ DEFAULT_PROMPT = ["You are a famous, condescending chef defined by his fiery tem
 CHEF_LIST = ["Gordon Ramsay", "Guy Fieri"]
 
 # App title
-st.set_page_config(page_title="Personal Chef")
+st.set_page_config(page_title="Personal Chef", page_icon="👨‍🍳")
 
 # Replicate Credentials
 with st.sidebar:

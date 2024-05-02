@@ -33,6 +33,8 @@ with st.sidebar:
 
     #! We remove these sliders and headings later once we tune it
     st.subheader("Options")
+    temperature = 0.2
+    top_p = 0.1
     # temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=5.0, value=0.2, step=0.01)
     # top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.1, step=0.01)
 
@@ -106,7 +108,7 @@ def generate_arctic_response():
         yield str(event)
 
 # User-provided prompt
-if prompt := st.text_area(disabled=not replicate_api):
+if prompt := st.text_area(disabled=not replicate_api, label="Enter your ingredients here"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user", avatar="👨‍🍳"):
         st.write(prompt)

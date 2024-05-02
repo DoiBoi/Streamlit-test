@@ -34,8 +34,8 @@ with st.sidebar:
     st.subheader("Options")
     temperature = 0.2
     top_p = 0.1
-    # temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=5.0, value=0.2, step=0.01)
-    # top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.1, step=0.01)
+    temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=5.0, value=0.2, step=0.01)
+    top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.1, step=0.01)
 
     # Chef personality selector
     option = st.sidebar.selectbox('Please select a chef:', CHEF_LIST)
@@ -62,10 +62,10 @@ st.sidebar.button(':red[Clear chat]', on_click=clear_chat_history)
 
 st.sidebar.divider()
 
-
+st.subheader("About")
 st.sidebar.caption('This chat bot is designed to give you recipe suggestions based on ingredients you have. To use it, write each of your ingredients separated by commas.')
 st.sidebar.caption("Here's an example message:")
-st.sidebar.caption("""Egg, flour, milk, vanilla extract, baking soda, baking powder, butter, sugar, salt.""")
+st.sidebar.caption("""Eggs, flour, milk, vanilla extract, baking soda, baking powder, butter, sugar, salt.""")
 
 st.sidebar.divider()
 

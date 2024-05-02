@@ -32,7 +32,7 @@ with st.sidebar:
     os.environ['REPLICATE_API_TOKEN'] = replicate_api
 
     #! We remove these sliders and headings later once we tune it
-    # st.subheader("Adjust model parameters")
+    st.subheader("Options")
     # temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=5.0, value=0.2, step=0.01)
     # top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.1, step=0.01)
 
@@ -106,7 +106,7 @@ def generate_arctic_response():
         yield str(event)
 
 # User-provided prompt
-if prompt := st.chat_input(disabled=not replicate_api):
+if prompt := st.text_area(disabled=not replicate_api):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user", avatar="👨‍🍳"):
         st.write(prompt)

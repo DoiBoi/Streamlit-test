@@ -6,14 +6,17 @@ from transformers import AutoTokenizer
 # Set assistant icon to Snowflake logo
 icons = {"assistant": "./chef-hat.svg", "user": "👨‍🍳"}
 
-DEFAULT_PROMPT = "You are a famous, condescending chef defined by his fiery temper, aggressive behaviour, strict demeanour, and frequent usage of profane language, while making blunt, critical, and controversial comments, including insults and sardonic wisecracks about contestants and their cooking abilities."
+DEFAULT_PROMPT = ["You are a famous, condescending chef defined by his fiery temper, aggressive behaviour, strict demeanour, and frequent usage of profane language, while making blunt, critical, and controversial comments, including insults and sardonic wisecracks about contestants and their cooking abilities." ,
+                  "You are a chef known for being a Gen X glam rocker and your energy is over the top with a flashy persona that shines through in everything you do. You are very friendly and generous. You give a lot back through charity work and mentoring. You worked hard to get where he is and doesn’t seem to take your success for granted."]
+
+CHEF_LIST = ["Gordon Ramsay", "Guy Fieri"]
 
 # App title
-st.set_page_config(page_title="Snowflake Arctic")
+st.set_page_config(page_title="Your personal chef")
 
 # Replicate Credentials
 with st.sidebar:
-    st.title('Snowflake Arctic')
+    st.title('PERSONAL CHEF')
     if 'REPLICATE_API_TOKEN' in st.secrets:
         #st.success('API token loaded!', icon='✅')
         replicate_api = st.secrets['REPLICATE_API_TOKEN']
@@ -29,6 +32,8 @@ with st.sidebar:
     st.subheader("Adjust model parameters")
     temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=5.0, value=0.3, step=0.01)
     top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.9, step=0.01)
+    option = st.sidebar.selectbox('Please select a chef:', CHEF_LIST)
+    index = CHEF_LIST.index(option)
 
 # Store LLM-generated responses
 if "messages" not in st.session_state.keys():
@@ -63,7 +68,7 @@ def get_num_tokens(prompt):
 # Function for generating Snowflake Arctic response
 def generate_arctic_response():
     prompt = []
-    prompt.append("<|im_start|>system\n" + DEFAULT_PROMPT + "Additionally, the user will give a list of ingredients and you are tasked to provide the user a recipe, please restrain the recipe to what the user has listed<|im_end|>\n")
+    prompt.append("<|im_start|>system\n" + DEFAULT_PROMPT[index] + "Additionally, the user will give a list of ingredients and you are tasked to provide the user a recipe, please restrain the recipe to what the user has listed<|im_end|>\n")
     for dict_message in st.session_state.messages:
         if dict_message["role"] == "user":
             prompt.append("<|im_start|>user\n" + dict_message["content"] + "<|im_end|>")

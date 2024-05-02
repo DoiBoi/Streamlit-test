@@ -48,9 +48,12 @@ start_message = "Hi. I'm an language model trained to be your personal chef! Ask
 if "messages" not in st.session_state.keys():
     st.session_state.messages = [{"role": "assistant", "content": start_message}]
 
+# Create container for messages area
+container = st.container()
+
 # Display or clear chat messages
 for message in st.session_state.messages:
-    with st.container():
+    with container:
         with st.chat_message(message["role"], avatar=icons[message["role"]]):
             st.write(message["content"])
 
@@ -111,13 +114,13 @@ def generate_arctic_response():
 # User-provided prompt
 if prompt := st.text_area(disabled=not replicate_api, label="Enter your ingredients here"):
     st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.container():
+    with container:
         with st.chat_message("user", avatar="👨‍🍳"):
             st.write(prompt)
 
 # Generate a new response if last message is not from assistant
 if st.session_state.messages[-1]["role"] != "assistant":
-    with st.container():
+    with container:
         with st.chat_message("assistant", avatar="./chef-hat.svg"):
             response = generate_arctic_response()
             full_response = st.write_stream(response)

@@ -45,6 +45,8 @@ st.sidebar.button('Clear chat history', on_click=clear_chat_history)
 
 st.sidebar.caption('Built by [Snowflake](https://snowflake.com/) to demonstrate [Snowflake Arctic](https://www.snowflake.com/blog/arctic-open-and-efficient-foundation-language-models-snowflake). App hosted on [Streamlit Community Cloud](https://streamlit.io/cloud). Model hosted by [Replicate](https://replicate.com/snowflake/snowflake-arctic-instruct).')
 
+st.sidebar.caption('For any health-related concerns, including allergy information, please consult a qualified medical expert or your personal physician. Never rely solely on the advice of an AI language model for matters concerning your well-being.')
+
 @st.cache_resource(show_spinner=False)
 def get_tokenizer():
     """Get a tokenizer to make sure we're not sending too much text
@@ -61,7 +63,7 @@ def get_num_tokens(prompt):
 # Function for generating Snowflake Arctic response
 def generate_arctic_response():
     prompt = []
-    prompt.append("<|im_start|>system\n" + DEFAULT_PROMPT + "<|im_end|>\n")
+    prompt.append("<|im_start|>system\n" + DEFAULT_PROMPT + "Additionally, the user will give a list of ingredients and you are tasked to provide the user a recipe<|im_end|>\n")
     for dict_message in st.session_state.messages:
         if dict_message["role"] == "user":
             prompt.append("<|im_start|>user\n" + dict_message["content"] + "<|im_end|>")

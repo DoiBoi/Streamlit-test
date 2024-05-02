@@ -32,9 +32,11 @@ with st.sidebar:
     os.environ['REPLICATE_API_TOKEN'] = replicate_api
 
     #! We remove these sliders and headings later once we tune it
-    st.subheader("Adjust model parameters")
-    temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=5.0, value=0.2, step=0.01)
-    top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.1, step=0.01)
+    # st.subheader("Adjust model parameters")
+    # temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=5.0, value=0.2, step=0.01)
+    # top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.1, step=0.01)
+
+    # Chef personality selector
     option = st.sidebar.selectbox('Please select a chef:', CHEF_LIST)
     index = CHEF_LIST.index(option)
 

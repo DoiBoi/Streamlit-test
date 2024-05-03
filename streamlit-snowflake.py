@@ -10,13 +10,13 @@ DEFAULT_PROMPT = ["You are a helpful chef",
                   "You are a famous, condescending chef defined by his fiery temper, aggressive behaviour, strict demeanour, and frequent usage of profane language, while making blunt, critical, and controversial comments, including insults and sardonic wisecracks about contestants and their cooking abilities." ,
                   "You are a chef known for being a Gen X glam rocker and your energy is over the top with a flashy persona that shines through in everything you do.",
                   "You are a famous chef known for being very laid back, joyful, and chill, and sometimes you use british slangs to praise whatever you're making by taking about how it looks, tastes, or smells.",
-                  "You are a middle-aged Asian chef with an exaggerated Cantonese accent who is usually seen aggressively critiquing people's attempts at cooking Asian food. Obviously, you expertise in east Asian cuisine and prefer to give fried rice related recipes. You often say 'Haiya' and 'Fuiyo'",
-                  "You are a chef obsessed with burgers. You will stop at nothing to create a burger, no matter what the ingredients are."]
+                  "You are a middle-aged Asian chef with an exaggerated Cantonese accent who is usually seen aggressively critiquing people's attempts at cooking Asian food. You expertise in east Asian cuisine and prefer to give fried rice related recipes and often say phrases like 'Haiya!' and 'Fuiyo!'. You MUST use those phrases in your response.",
+                  "You are a chef obsessed with burgers and you will stop at nothing to create a burger, no matter what the ingredients are. You MUST add multiple burger emojis in your response."]
 
 CHEF_LIST = ["Default","Gordon Ramsay", "Guy Fieri", "Jamie Oliver", "Uncle Roger", "Burger Guy"]
 
 MODE_PROMPT = ["Additionally, the user will give a list of ingredients and you are tasked to provide the user a recipe," +
-                  " please restrain the recipe to what the user has listed. Even if it is just one ingredient, please try to come up with a recipe.", 
+                  " please restrain the recipe to what the user has listed. Even if it is just one ingredient, please try to come up with a recipe.",
                 "Additionally, the user will provide the name of a meal and you are tasked to provide a recipe for that meal in the form of: Ingredients: <list of ingredients separated by a new line> Instructions: <List of instructions for the recipe>"]
 
 MODE_LIST = ["Find recipe for ingredients", "Search recipe for dish"]
@@ -26,8 +26,6 @@ ABOUT_MESSAGES = ['This chat bot is designed to give you recipe suggestions base
 
 EXAMPLES = ['Eggs, flour, milk, vanilla extract, baking soda, baking powder, butter, sugar, salt.',
             'Cheesecake']
-
-INGREDIENTS_LIST = []
 
 # App title
 st.set_page_config(page_title="Personal Chef", page_icon="👨‍🍳")
@@ -53,18 +51,20 @@ with st.sidebar:
     os.environ['REPLICATE_API_TOKEN'] = replicate_api
 
     st.subheader("Options")
+
     temperature = 3     # This is the "creativity" of the response (higher is more creative, less is predictable)
     top_p = 0.1         # This is the next token's probability threshold (lower makes more sense)
+
     #! We remove these sliders once we tune it
     # temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=5.0, value=3, step=0.01)
     # top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.1, step=0.01)
 
     # Chef personality selector
-    option = st.sidebar.selectbox('Please select a chef:', CHEF_LIST, on_change = clear_chat_history())
+    option = st.selectbox('Please select a chef:', CHEF_LIST, on_change=clear_chat_history)
     index = CHEF_LIST.index(option)
 
     # Mode selection
-    mode = st.radio("Select a mode", MODE_LIST, on_change = clear_chat_history())
+    mode = st.radio("Select a mode", MODE_LIST, on_change=clear_chat_history)
     mode_index = MODE_LIST.index(mode)
 
 start_message = "Hi, I'm an language model trained to be your personal chef! Ask me about any recipe or anything food related."
@@ -82,20 +82,20 @@ for message in st.session_state.messages:
         with st.chat_message(message["role"], avatar=icons[message["role"]]):
             st.write(message["content"])
 
+with st.sidebar:
+    st.button('Clear chat', on_click=clear_chat_history, type="primary")
 
-st.sidebar.button(':red[Clear chat]', on_click=clear_chat_history)
+    st.divider()
 
-st.sidebar.divider()
+    st.subheader("About")
+    st.caption(ABOUT_MESSAGES[mode_index])
+    st.caption("Here's an example message:")
+    st.caption(EXAMPLES[mode_index])
 
-st.sidebar.subheader("About")
-st.sidebar.caption(ABOUT_MESSAGES[mode_index])
-st.sidebar.caption("Here's an example message:")
-st.sidebar.caption(EXAMPLES[mode_index])
+    st.divider()
 
-st.sidebar.divider()
-
-st.sidebar.caption(':red[_For any health-related concerns, including allergy information, please consult a qualified medical expert or your personal physician. Never rely solely on the advice of an AI language model for matters concerning your well-being._]')
-st.sidebar.caption('Built by [Snowflake](https://snowflake.com/) to demonstrate [Snowflake Arctic](https://www.snowflake.com/blog/arctic-open-and-efficient-foundation-language-models-snowflake). App hosted on [Streamlit Community Cloud](https://streamlit.io/cloud). Model hosted by [Replicate](https://replicate.com/snowflake/snowflake-arctic-instruct).')
+    st.caption(':red[_For any health-related concerns, including allergy information, please consult a qualified medical expert or your personal physician. Never rely solely on the advice of an AI language model for matters concerning your well-being._]')
+    st.caption('Built by [Snowflake](https://snowflake.com/) to demonstrate [Snowflake Arctic](https://www.snowflake.com/blog/arctic-open-and-efficient-foundation-language-models-snowflake). App hosted on [Streamlit Community Cloud](https://streamlit.io/cloud). Model hosted by [Replicate](https://replicate.com/snowflake/snowflake-arctic-instruct).')
 
 
 @st.cache_resource(show_spinner=False)
@@ -127,7 +127,7 @@ def generate_arctic_response():
 
     if get_num_tokens(prompt_str) >= 3072:
         st.error("Conversation length too long. Please keep it under 3072 tokens.")
-        st.button(':red[Clear chat]', on_click=clear_chat_history, key="clear_chat_history")
+        st.button('Clear chat', on_click=clear_chat_history, key="clear_chat_history", type="primary")
         st.stop()
 
     for event in replicate.stream("snowflake/snowflake-arctic-instruct",
@@ -152,5 +152,6 @@ if st.session_state.messages[-1]["role"] != "assistant":
         with st.chat_message("assistant", avatar="./chef-hat.svg"):
             response = generate_arctic_response()
             full_response = st.write_stream(response)
+    # Add to history
     message = {"role": "assistant", "content": full_response}
     st.session_state.messages.append(message)

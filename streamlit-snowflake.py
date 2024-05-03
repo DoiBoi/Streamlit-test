@@ -14,6 +14,12 @@ DEFAULT_PROMPT = ["You are a helpful chef",
 
 CHEF_LIST = ["Default","Gordon Ramsay", "Guy Fieri", "Jamie Oliver", "Burger Guy"]
 
+MODE_PROMPT = ["Additionally, the user will give a list of ingredients and you are tasked to provide the user a recipe," +
+                  " please restrain the recipe to what the user has listed. Even if it is just one ingredient, please try to come up with a recipe.", 
+                "Additionally, the user will provide the name of a meal and you are tasked to provide a recipe for that meal in the form of: Ingredients: <list of ingredients separated by a new line> Instructions: <List of instructions for the recipe>"]
+
+MODE_LIST = ["Find recipe for ingredients", "Search recipe for dish"]
+
 INGREDIENTS_LIST = []
 
 # App title
@@ -45,6 +51,10 @@ with st.sidebar:
     # Chef personality selector
     option = st.sidebar.selectbox('Please select a chef:', CHEF_LIST)
     index = CHEF_LIST.index(option)
+
+    # Mode selection
+    mode = st.radio("Select a mode", MODE_LIST)
+    mode_index = MODE_LIST.index(mode)
 
 start_message = "Hi, I'm an language model trained to be your personal chef! Ask me about any recipe or anything food related."
 
@@ -94,8 +104,7 @@ def get_num_tokens(prompt):
 # Function for generating Snowflake Arctic response
 def generate_arctic_response():
     prompt = []
-    prompt.append("<|im_start|>system\n" + DEFAULT_PROMPT[index] + "Additionally, the user will give a list of ingredients and you are tasked to provide the user a recipe," +
-                  " please restrain the recipe to what the user has listed. Even if it is just one ingredient, please try to come up with a recipe.<|im_end|>\n")
+    prompt.append("<|im_start|>system\n" + DEFAULT_PROMPT[index] + MODE_PROMPT[mode_index] + "<|im_end|>\n")
     for dict_message in st.session_state.messages:
         if dict_message["role"] == "user":
             prompt.append("<|im_start|>user\n" + dict_message["content"] + "<|im_end|>")

@@ -22,15 +22,15 @@ st.set_page_config(page_title="Personal Chef", page_icon="👨‍🍳")
 with st.sidebar:
     st.title('PERSONAL CHEF :cook:')
     if 'REPLICATE_API_TOKEN' in st.secrets:
-        #st.success('API token loaded!', icon='✅')
+        # st.success('API token loaded!', icon='✅')
         replicate_api = st.secrets['REPLICATE_API_TOKEN']
     else:
         replicate_api = st.text_input('Enter Replicate API token:', type='password')
         if not (replicate_api.startswith('r8_') and len(replicate_api)==40):
             st.warning('Please enter your Replicate API token.', icon='⚠️')
             st.markdown("**Don't have an API token?** Head over to [Replicate](https://replicate.com) to sign up for one.")
-        #else:
-        #    st.success('API token loaded!', icon='✅')
+        else:
+           st.success('API token loaded!', icon='✅')
 
     os.environ['REPLICATE_API_TOKEN'] = replicate_api
 
@@ -45,7 +45,7 @@ with st.sidebar:
     option = st.sidebar.selectbox('Please select a chef:', CHEF_LIST)
     index = CHEF_LIST.index(option)
 
-start_message = "Hi. I'm an language model trained to be your personal chef! Ask me about any recipe or anything food related."
+start_message = "Hi, I'm an language model trained to be your personal chef! Ask me about any recipe or anything food related."
 
 # Store LLM-generated responses
 if "messages" not in st.session_state.keys():

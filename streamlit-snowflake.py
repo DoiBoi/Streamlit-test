@@ -20,6 +20,12 @@ MODE_PROMPT = ["Additionally, the user will give a list of ingredients and you a
 
 MODE_LIST = ["Find recipe for ingredients", "Search recipe for dish"]
 
+ABOUT_MESSAGES = ['This chat bot is designed to give you recipe suggestions based on ingredients you have. To use it, write each of your ingredients separated by commas.',
+                  'This chat bot is designed to give you a recipe based on the dish you provide. To use it, Simply enter the name of your dish.']
+
+EXAMPLES = ['Eggs, flour, milk, vanilla extract, baking soda, baking powder, butter, sugar, salt.',
+            'Cheesecake']
+
 INGREDIENTS_LIST = []
 
 # App title
@@ -78,9 +84,9 @@ st.sidebar.button(':red[Clear chat]', on_click=clear_chat_history)
 st.sidebar.divider()
 
 st.sidebar.subheader("About")
-st.sidebar.caption('This chat bot is designed to give you recipe suggestions based on ingredients you have. To use it, write each of your ingredients separated by commas.')
+st.sidebar.caption(ABOUT_MESSAGES[mode_index])
 st.sidebar.caption("Here's an example message:")
-st.sidebar.caption('Eggs, flour, milk, vanilla extract, baking soda, baking powder, butter, sugar, salt.')
+st.sidebar.caption(EXAMPLES[mode_index])
 
 st.sidebar.divider()
 

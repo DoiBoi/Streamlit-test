@@ -13,6 +13,8 @@ DEFAULT_PROMPT = ["You are a helpful chef",
 
 CHEF_LIST = ["Default","Gordon Ramsay", "Guy Fieri", "Jamie Oliver"]
 
+INGREDIENTS_LIST = []
+
 # App title
 st.set_page_config(page_title="Personal Chef", page_icon="👨‍🍳")
 
@@ -91,7 +93,9 @@ def get_num_tokens(prompt):
 # Function for generating Snowflake Arctic response
 def generate_arctic_response():
     prompt = []
-    prompt.append("<|im_start|>system\n" + DEFAULT_PROMPT[index] + "Additionally, the user will give a list of ingredients and you are tasked to provide the user a recipe, please restrain the recipe to what the user has listed. Even if it is just one ingredient, please try to come up with a recipe<|im_end|>\n")
+    prompt.append("<|im_start|>system\n" + DEFAULT_PROMPT[index] + "Additionally, the user will give a list of ingredients and you are tasked to provide the user a recipe," +
+                  " please restrain the recipe to what the user has listed. Even if it is just one ingredient, please try to come up with a recipe. " + 
+                  + "Please format the messages as follows: [any comments] \n Ingredients: [List of Ingredients] \n Instructions: [instruction to cook]<|im_end|>\n")
     for dict_message in st.session_state.messages:
         if dict_message["role"] == "user":
             prompt.append("<|im_start|>user\n" + dict_message["content"] + "<|im_end|>")

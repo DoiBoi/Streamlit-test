@@ -95,7 +95,7 @@ def generate_arctic_response():
     prompt = []
     prompt.append("<|im_start|>system\n" + DEFAULT_PROMPT[index] + "Additionally, the user will give a list of ingredients and you are tasked to provide the user a recipe," +
                   " please restrain the recipe to what the user has listed. Even if it is just one ingredient, please try to come up with a recipe. " + 
-                  "Please format the message as follows: [any comments] \n Ingredients: [List of Ingredients] \n Instructions: [instruction to cook]<|im_end|>\n")
+                  "Please put the ingredients under 'Ingredients' and the instructions in 'Instruction'\n")
     for dict_message in st.session_state.messages:
         if dict_message["role"] == "user":
             prompt.append("<|im_start|>user\n" + dict_message["content"] + "<|im_end|>")

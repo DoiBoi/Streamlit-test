@@ -9,7 +9,11 @@ Hackathon Team:
 Technologies used:
 
 - Python
--
+- Streamlit
+- Replicate
+- Snowflake Arctic AI Model
+
+---
 
 Add preview here
 

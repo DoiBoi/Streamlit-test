@@ -2,6 +2,7 @@ import streamlit as st
 import replicate
 import os
 from transformers import AutoTokenizer
+import re
 
 # Set assistant icon to Snowflake logo
 icons = {"assistant": "./chef-hat.svg", "user": "👨‍🍳"}
@@ -21,11 +22,18 @@ MODE_PROMPT = ["Additionally, the user will give a list of ingredients and you a
 
 MODE_LIST = ["Find recipe for ingredients", "Search recipe for dish"]
 
-ABOUT_MESSAGES = ['This chat bot is designed to give you recipe suggestions based on ingredients you have. To use it, write each of your ingredients separated by commas.',
-                  'This chat bot is designed to give you a recipe based on the dish you provide. To use it, Simply enter the name of your dish.']
+ABOUT_MESSAGES = ['This chat bot is designed to give you recipe suggestions based on ingredients you have. To use it, simply write each of your ingredients separated by commas.',
+                  'This chat bot is designed to give you a recipe based on the dish you provide. To use it, simply enter the name of your dish.']
 
 EXAMPLES = ['Eggs, flour, milk, vanilla extract, baking soda, baking powder, butter, sugar, salt.',
-            'Cheesecake']
+            'Bolognese']
+
+# This is used to check that all the ingredients detected are valid
+# https://github.com/schollz/food-identicon/blob/master/ingredients.txt
+INGREDIENT_LIST = []
+with open("ingredients_list.txt", mode="r") as file:
+    lines = file.read().split("\n")
+    INGREDIENT_LIST = lines
 
 # App title
 st.set_page_config(page_title="Personal Chef", page_icon="👨‍🍳")
@@ -138,20 +146,82 @@ def generate_arctic_response():
                                   }):
         yield str(event)
 
+# Function for generating Snowflake Arctic ingredients list
+def generate_arctic_ingredients():
+    prompt = []
+    prompt.append("<|im_start|>system\nThe user will give you a recipe, please return all the ingredients listed in the message as a COMMA SEPARATED SENTENCE without any measurements. It doesn't matter whether the recipe is complete or not, just try to find as many as possible.<|im_end|>\n")
+    prompt.append("<|im_start|>user\n" + st.session_state.messages[-1]["content"] + "<|im_end|>")
+
+    prompt.append("<|im_start|>assistant")
+    prompt.append("")
+    prompt_str = "\n".join(prompt)
+
+    if get_num_tokens(prompt_str) >= 3072:
+        st.error("Conversation length too long. Please keep it under 3072 tokens.")
+        st.button('Clear chat', on_click=clear_chat_history, key="clear_chat_history", type="primary")
+        st.stop()
+
+    for event in replicate.stream("snowflake/snowflake-arctic-instruct",
+                           input={"prompt": prompt_str,
+                                  "prompt_template": r"{prompt}",
+                                  "temperature": 0.1,
+                                  "top_p": 1,
+                                  }):
+        yield str(event)
+
+def replace_ingredient(ingredient):
+    # Make new input and remove old one
+    prev_user_input = st.session_state.messages[-2]
+
+    # Add the other ingredients in a way that makes sense
+    if "but without using" in prev_user_input["content"]:
+        user_input = {"role": "user", "content": f"{prev_user_input['content']}, and {ingredient}"}
+    else:
+        user_input = {"role": "user", "content": f"{prev_user_input['content']} but without using {ingredient}"}
+    st.session_state.messages.append(user_input)
+
+    # Add new user input to history
+    with container:
+        with st.chat_message("user", avatar="👨‍🍳"):
+            st.write(user_input["content"])
+
+    # Generate new response
+    generate_display_info()
+
+# Generates the regular response and the ingredients list
+def generate_display_info():
+    with container:
+        with st.chat_message("assistant", avatar="./chef-hat.svg"):
+            response = generate_arctic_response()
+            full_response = st.write_stream(response)
+
+            # Add to history
+            message = {"role": "assistant", "content": full_response}
+            st.session_state.messages.append(message)
+
+            if mode_index == 1:
+                # Get all the ingredients needed and put them into a list
+                ingredients_msg = generate_arctic_ingredients()
+                ingredients = "".join(list(ingredients_msg)).split("\n\n")[-1]  # This stops any overflow from previous responses
+                ingredients_list = ingredientregex.sub("", ingredients).strip(" ").split(", ")
+
+                # Show the replace ingredients list
+                with st.expander("Replace ingredient:"):
+                    for ingredient in ingredients_list:
+                        if ingredient in INGREDIENT_LIST:
+                            st.button(ingredient, type="secondary", key=ingredient, on_click=lambda ingredient=ingredient: replace_ingredient(ingredient))
+
 # User-provided prompt
-prompt = st.chat_input(disabled=not replicate_api, placeholder="Enter your ingredients here")
+prompt = st.chat_input(disabled=not replicate_api, on_submit=generate_arctic_response, placeholder="Enter your ingredients here")
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     with container:
         with st.chat_message("user", avatar="👨‍🍳"):
             st.write(prompt)
 
+# Regex for getting just ingredients
+ingredientregex = re.compile("[^a-zA-Z, \r\n]")       # https://stackoverflow.com/a/22521156
+
 # Generate a new response if last message is not from assistant
 if st.session_state.messages[-1]["role"] != "assistant":
-    with container:
-        with st.chat_message("assistant", avatar="./chef-hat.svg"):
-            response = generate_arctic_response()
-            full_response = st.write_stream(response)
-    # Add to history
-    message = {"role": "assistant", "content": full_response}
-    st.session_state.messages.append(message)
+    generate_display_info()

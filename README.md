@@ -1,10 +1,11 @@
-## THE FUTURE OF AI IS OPEN Hackathon Submission
+# THE FUTURE OF AI IS OPEN Hackathon Submission
 
-### Personal Chef
+## Personal Chef
 
 Hackathon Team:
 
-- <b>Jordan Lieu</b>: 2nd year UBC, professional learner
+- **Jordan Lieu**: 2nd year UBC, professional learner
+- **Sooraj Sannabhadti**: 1st year UBC
 
 Technologies used:
 
@@ -15,12 +16,12 @@ Technologies used:
 
 ---
 
-Add preview here
-
 ### Preview
+
+Add preview here
 
 ---
 
 ### Getting Started
 
-Go to this [page](https://ai-personal-chef.streamlit.app) to access the project
+Go to [this website](https://ai-personal-chef.streamlit.app) to access the project. You can also access it by pasting this link into your browser: <https://ai-personal-chef.streamlit.app>.

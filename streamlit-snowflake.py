@@ -10,9 +10,10 @@ DEFAULT_PROMPT = ["You are a helpful chef",
                   "You are a famous, condescending chef defined by his fiery temper, aggressive behaviour, strict demeanour, and frequent usage of profane language, while making blunt, critical, and controversial comments, including insults and sardonic wisecracks about contestants and their cooking abilities." ,
                   "You are a chef known for being a Gen X glam rocker and your energy is over the top with a flashy persona that shines through in everything you do.",
                   "You are a famous chef known for being very laid back, joyful, and chill, and sometimes you use british slangs to praise whatever you're making by taking about how it looks, tastes, or smells.",
+                  "You are a middle-aged Asian chef with an exaggerated Cantonese accent who is usually seen aggressively critiquing people's attempts at cooking Asian food. Obviously, you expertise in east Asian cuisine and prefer to give fried rice related recipes. You often say 'Haiya' and 'Fuiyo'",
                   "You are a chef obsessed with burgers. You will stop at nothing to create a burger, no matter what the ingredients are."]
 
-CHEF_LIST = ["Default","Gordon Ramsay", "Guy Fieri", "Jamie Oliver", "Burger Guy"]
+CHEF_LIST = ["Default","Gordon Ramsay", "Guy Fieri", "Jamie Oliver", "Uncle Roger", "Burger Guy"]
 
 MODE_PROMPT = ["Additionally, the user will give a list of ingredients and you are tasked to provide the user a recipe," +
                   " please restrain the recipe to what the user has listed. Even if it is just one ingredient, please try to come up with a recipe.", 
@@ -30,6 +31,10 @@ INGREDIENTS_LIST = []
 
 # App title
 st.set_page_config(page_title="Personal Chef", page_icon="👨‍🍳")
+
+start_message = "Hi, I'm an language model trained to be your personal chef! Ask me about any recipe or anything food related."
+def clear_chat_history():
+    st.session_state.messages = [{"role": "assistant", "content": start_message}]
 
 # Replicate Credentials
 with st.sidebar:
@@ -55,11 +60,11 @@ with st.sidebar:
     # top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.1, step=0.01)
 
     # Chef personality selector
-    option = st.sidebar.selectbox('Please select a chef:', CHEF_LIST)
+    option = st.sidebar.selectbox('Please select a chef:', CHEF_LIST, on_change = clear_chat_history())
     index = CHEF_LIST.index(option)
 
     # Mode selection
-    mode = st.radio("Select a mode", MODE_LIST)
+    mode = st.radio("Select a mode", MODE_LIST, on_change = clear_chat_history())
     mode_index = MODE_LIST.index(mode)
 
 start_message = "Hi, I'm an language model trained to be your personal chef! Ask me about any recipe or anything food related."
@@ -77,8 +82,7 @@ for message in st.session_state.messages:
         with st.chat_message(message["role"], avatar=icons[message["role"]]):
             st.write(message["content"])
 
-def clear_chat_history():
-    st.session_state.messages = [{"role": "assistant", "content": start_message}]
+
 st.sidebar.button(':red[Clear chat]', on_click=clear_chat_history)
 
 st.sidebar.divider()

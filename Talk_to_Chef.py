@@ -209,6 +209,29 @@ def replace_ingredient(ingredient):
     # Generate new response
     generate_display_info()
 
+# Function for generating Snowflake Arctic name
+def generate_arctic_name():
+    prompt = []
+    prompt.append("<|im_start|>system\nThe user will give you a recipe with instructions, please return a fitting name for this recipe, and ensure that your response ONLY includes this name, and nothing else. It doesn't matter whether the recipe is complete or not, just try to create a name.<|im_end|>\n")
+    prompt.append("<|im_start|>user\n" + st.session_state.messages[-1]["content"] + "<|im_end|>")
+
+    prompt.append("<|im_start|>assistant")
+    prompt.append("")
+    prompt_str = "\n".join(prompt)
+
+    if get_num_tokens(prompt_str) >= 3072:
+        st.error("Conversation length too long. Please keep it under 3072 tokens.")
+        st.button('Clear chat', on_click=clear_chat_history, key="clear_chat_history", type="primary")
+        st.stop()
+
+    for event in replicate.stream("snowflake/snowflake-arctic-instruct",
+                           input={"prompt": prompt_str,
+                                  "prompt_template": r"{prompt}",
+                                  "temperature": 0.1,
+                                  "top_p": 1,
+                                  }):
+        yield str(event)
+
 # saves given recipe into session state
 # recipe parameter: recipe object (defined near the top of the file)
 def save_recipe(recipe):
@@ -240,6 +263,9 @@ def generate_display_info():
             ingredients = "".join(list(ingredients_msg)).split("\n\n")[-1]  # This stops any overflow from previous responses
             ingredients_list = ingredientregex.sub("", ingredients).strip(" ").split(", ")
 
+            name_msg = generate_arctic_name()
+            # name = "".join(list(name_msg)).split("\n\n")[-1] # may or may not be needed
+
             # Make everything capitalized to stop issues and format nicer
             ingredient_list = [i.capitalize() for i in ingredients_list]
 
@@ -249,7 +275,7 @@ def generate_display_info():
                 if ingredient in INGREDIENT_LIST:
                     ingredients_list.append(ingredient)
 
-            st.button("Save recipe", type="secondary", key="save", on_click=lambda recipe=Recipe("temp name", ingredients_list, full_response): save_recipe(recipe))
+            st.button("Save recipe", type="secondary", key="save", on_click=lambda recipe=Recipe(name_msg, ingredients_list, full_response): save_recipe(recipe))
 
             if mode_index == 1:
                 # Show the replace ingredients list

@@ -6,11 +6,11 @@ import re
 from Talk_to_Chef import INGREDIENT_LIST
 
 st.set_page_config(
-    page_title="Hello",
-    page_icon="👋",
+    page_title="Saved Recipes - Chef Chat",
+    page_icon="📃",
 )
 
-st.write("Saved Recipes")
+st.title("Saved Recipes 📃")
 
 # st.markdown(
 #     """
@@ -30,15 +30,22 @@ st.write("Saved Recipes")
 # """
 # )
 
+# Create sidebar
+with st.sidebar:
+    st.subheader("Filters")
+    veg = st.checkbox("Non-vegetarian")
+    dairy = st.checkbox("Dairy")
+    min_time, max_time = st.select_slider("Preparation time (minutes)", options=[i for i in range(0, 121, 5)], value=[0, 120])
+
 # create container for saved recipe viewer section
 viewing_container = st.container()
-with viewing_container: 
+with viewing_container:
     if "recipes" not in st.session_state:
-        st.write("There's nothing here!")
+        st.write("There's nothing to show here! Save a recipe to see it here.")
 
     elif st.session_state.recipes == []:
-        st.write("There's nothing here!")
-        
+        st.write("There's nothing to show here! Save a recipe to see it here.")
+
     else:
         for recipe in st.session_state.recipes:
             st.write(recipe.name)

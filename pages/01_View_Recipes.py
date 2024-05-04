@@ -36,8 +36,9 @@ with viewing_container:
     if "recipes" not in st.session_state:
         st.write("There's nothing here!")
 
-    if st.session_state.recipes == []:
+    elif st.session_state.recipes == []:
         st.write("There's nothing here!")
+        
     else:
         for recipe in st.session_state.recipes:
             st.write(recipe.name)

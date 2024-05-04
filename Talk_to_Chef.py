@@ -7,12 +7,19 @@ import re
 # Set assistant icon to Snowflake logo
 icons = {"assistant": "./resources/chef-hat.svg", "user": "👨‍🍳"}
 
-DEFAULT_PROMPT = ["You are a helpful chef",
-                  "You are a famous, condescending chef defined by his fiery temper, aggressive behaviour, strict demeanour, and frequent usage of profane language, while making blunt, critical, and controversial comments, including insults and sardonic wisecracks about contestants and their cooking abilities." ,
-                  "You are a chef known for being a Gen X glam rocker and your energy is over the top with a flashy persona that shines through in everything you do.",
-                  "You are a famous chef known for being very laid back, joyful, and chill, and sometimes you use british slangs to praise whatever you're making by taking about how it looks, tastes, or smells.",
-                  "You are a middle-aged Asian chef with an exaggerated Cantonese accent who is usually seen aggressively critiquing people's attempts at cooking Asian food. You expertise in east Asian cuisine and prefer to give fried rice related recipes and often say phrases like 'Haiya!' and 'Fuiyo!'. You MUST use those phrases in your response.",
-                  "You are a chef obsessed with burgers and you will stop at nothing to create a burger, no matter what the ingredients are. You MUST add multiple burger emojis in your response."]
+DEFAULT_INGREDIENTS_PROMPT = ["You are a chef. Only provide the ingredients to this dish, do NOT under any circumstance provide the methodology or anything else.",
+                  "You are a famous, condescending chef defined by his fiery temper, aggressive behaviour, strict demeanour, and frequent usage of profane language. Only provide the ingredients to this dish, do NOT under any circumstance provide the methodology or anything else." ,
+                  "You are a chef known for being a Gen X glam rocker and your energy is over the top with a flashy persona. Only provide the ingredients to this dish, do NOT under any circumstance provide the methodology or anything else.",
+                  "You are a famous chef known for being very laid back, joyful, and chill. Only provide the ingredients to this dish, do NOT under any circumstance provide the methodology or anything else.",
+                  "You are a middle-aged Asian chef who's expertise is in east Asian cuisine and prefer to give fried rice related recipes. Only provide the ingredients to this dish, do NOT under any circumstance provide the methodology or anything else.",
+                  "You are a chef obsessed with burgers and you will stop at nothing to create a burger. Only provide the ingredients to this dish, do NOT under any circumstance provide the methodology or anything else."]
+
+DEFAULT_METHOD_PROMPT = ["You are a helpful chef. Only provide the instructions to make this dish, do NOT under any circumstance provide the ingredients or anything else. You MUST ONLY use the ingredients provided.",
+                  "You are a famous, condescending chef defined by his fiery temper, aggressive behaviour, strict demeanour, and frequent usage of profane language, while making blunt, critical, and controversial comments, including insults and sardonic wisecracks about contestants and their cooking abilities. Only provide the instructions to make this dish, do NOT under any circumstance provide the ingredients or anything else. You MUST ONLY use the ingredients provided.",
+                  "You are a chef known for being a Gen X glam rocker and your energy is over the top with a flashy persona that shines through in everything you do. Only provide the instructions to make this dish, do NOT under any circumstance provide the ingredients or anything else. You MUST ONLY use the ingredients provided.",
+                  "You are a famous chef known for being very laid back, joyful, and chill, and sometimes you use british slangs to praise whatever you're making by taking about how it looks, tastes, or smells. Only provide the instructions to make this dish, do NOT under any circumstance provide the ingredients or anything else. You MUST ONLY use the ingredients provided.",
+                  "You are a middle-aged Asian chef with an exaggerated Cantonese accent who is usually seen aggressively critiquing people's attempts at cooking Asian food. You expertise in east Asian cuisine and prefer to give fried rice related recipes and often say phrases like 'Haiya!' and 'Fuiyo!'. You MUST use those phrases in your response. Only provide the instructions to make this dish, do NOT under any circumstance provide the ingredients or anything else. You MUST ONLY use the ingredients provided.",
+                  "You are a chef obsessed with burgers and you will stop at nothing to create a burger, no matter what the ingredients are. You MUST add multiple burger emojis in your response. Only provide the instructions to make this dish, do NOT under any circumstance provide the ingredients or anything else. You MUST ONLY use the ingredients provided."]
 
 CHEF_LIST = ["Default","Gordon Ramsay", "Guy Fieri", "Jamie Oliver", "Uncle Roger", "Burger Guy"]
 
@@ -140,12 +147,39 @@ def get_num_tokens(prompt):
     tokens = tokenizer.tokenize(prompt)
     return len(tokens)
 
-# Function for generating Snowflake Arctic response
-def generate_arctic_response():
+# Function for generating Snowflake Arctic response for ingredients
+def generate_arctic_ingredients_response():
     prompt = []
-    prompt.append("<|im_start|>system\n" + DEFAULT_PROMPT[index] + MODE_PROMPT[mode_index] + "<|im_end|>\n")
+    prompt.append("<|im_start|>system\n" + DEFAULT_INGREDIENTS_PROMPT[index] + MODE_PROMPT[mode_index] + "<|im_end|>\n")
     for dict_message in st.session_state.messages:
         if dict_message["role"] == "user":
+            prompt.append("<|im_start|>user\n" + dict_message["content"] + "<|im_end|>")
+        else:
+            prompt.append("<|im_start|>assistant\n" + dict_message["content"] + "<|im_end|>")
+
+    prompt.append("<|im_start|>assistant")
+    prompt.append("")
+    prompt_str = "\n".join(prompt)
+
+    if get_num_tokens(prompt_str) >= 3072:
+        st.error("Conversation length too long. Please keep it under 3072 tokens.")
+        st.button('Clear chat', on_click=clear_chat_history, key="clear_chat_history", type="primary")
+        st.stop()
+
+    for event in replicate.stream("snowflake/snowflake-arctic-instruct",
+                           input={"prompt": prompt_str,
+                                  "prompt_template": r"{prompt}",
+                                  "temperature": temperature,
+                                  "top_p": top_p,
+                                  }):
+        yield str(event)
+
+# Function for generating Snowflake Arctic response for method
+def generate_arctic_method_response():
+    prompt = []
+    prompt.append("<|im_start|>system\n" + DEFAULT_METHOD_PROMPT[index] + "<|im_end|>\n")
+    for dict_message in st.session_state.messages:
+        if dict_message["role"] == "user" or dict_message == st.session_state.messages[-1]:
             prompt.append("<|im_start|>user\n" + dict_message["content"] + "<|im_end|>")
         else:
             prompt.append("<|im_start|>assistant\n" + dict_message["content"] + "<|im_end|>")
@@ -251,8 +285,16 @@ def clear_recipes():
 def generate_display_info():
     with container:
         with st.chat_message("assistant", avatar=icons["assistant"]):
-            response = generate_arctic_response()
-            full_response = st.write_stream(response)
+            ingredients_response = generate_arctic_ingredients_response()
+            method_response = generate_arctic_method_response()
+
+            icol, mcol = st.columns(2)
+            with icol:
+                ingredients_response = st.write_stream(ingredients_response)
+            with mcol:
+                method_response = st.write_stream(method_response)
+
+            full_response = "Ingredients:\n" + ingredients_response + "\n\nMethod:\n" + method_response
 
             # Add to history
             message = {"role": "assistant", "content": full_response}
@@ -264,7 +306,7 @@ def generate_display_info():
             ingredients_list = ingredientregex.sub("", ingredients).strip(" ").split(", ")
 
             name_msg = generate_arctic_name()
-            name = "".join(list(name_msg)).split("\n\n")[-1] 
+            name = "".join(list(name_msg)).split("\n\n")[-1]
 
             # Make everything capitalized to stop issues and format nicer
             ingredient_list = [i.capitalize() for i in ingredients_list]
@@ -288,7 +330,7 @@ def generate_display_info():
                         index += 1
 
 # User-provided prompt
-prompt = st.chat_input(disabled=not replicate_api, on_submit=generate_arctic_response, placeholder="Enter your ingredients here")
+prompt = st.chat_input(disabled=not replicate_api, placeholder="Enter your ingredients here")
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     with container:

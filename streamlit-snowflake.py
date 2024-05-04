@@ -42,6 +42,12 @@ with open("ingredients_list.txt", mode="r") as file:
     lines = file.read().split("\n")
     INGREDIENT_LIST = lines
 
+class Recipe:
+    def __init__(self, name, ingredients, instructions):
+        self.name = name
+        self.ingredients = ingredients
+        # self.instructions = instructions # to be implemented later, need to extract just the instructions from the ai response
+
 # App title
 st.set_page_config(page_title="Personal Chef", page_icon="👨‍🍳")
 
@@ -192,6 +198,20 @@ def replace_ingredient(ingredient):
     # Generate new response
     generate_display_info()
 
+# saves given recipe into session state
+# recipe parameter: recipe object (defined near the top of the file)
+def save_recipe(recipe):
+    if "recipes" not in st.session_state:
+        st.session_state.recipes = []
+    
+    st.session_state.recipes.append(recipe)
+
+# clears all saved recipes, if any are saved
+def clear_recipes():
+    if "recipes" in st.session_state:
+        st.session_state.recipes = []
+
+
 # Generates the regular response and the ingredients list
 def generate_display_info():
     with container:
@@ -203,11 +223,14 @@ def generate_display_info():
             message = {"role": "assistant", "content": full_response}
             st.session_state.messages.append(message)
 
+            # Get all the ingredients needed and put them into a list
+            ingredients_msg = generate_arctic_ingredients()
+            ingredients = "".join(list(ingredients_msg)).split("\n\n")[-1]  # This stops any overflow from previous responses
+            ingredients_list = ingredientregex.sub("", ingredients).strip(" ").split(", ")      
+
+            st.button("Save recipe", type="secondary", key="save", on_click=lambda recipe=Recipe("temp name", ingredients_list, None): save_recipe(recipe))      
+
             if mode_index == 1:
-                # Get all the ingredients needed and put them into a list
-                ingredients_msg = generate_arctic_ingredients()
-                ingredients = "".join(list(ingredients_msg)).split("\n\n")[-1]  # This stops any overflow from previous responses
-                ingredients_list = ingredientregex.sub("", ingredients).strip(" ").split(", ")
 
                 # Show the replace ingredients list
                 with st.expander("Replace ingredient:"):

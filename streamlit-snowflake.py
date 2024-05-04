@@ -198,7 +198,7 @@ def replace_ingredient(ingredient):
 def save_recipe(recipe):
     if "recipes" not in st.session_state:
         st.session_state.recipes = []
-    
+
     st.session_state.recipes.append(recipe)
     for recipe in st.session_state.recipes:
         print(recipe)
@@ -222,17 +222,20 @@ def generate_display_info():
             # Get all the ingredients needed and put them into a list
             ingredients_msg = generate_arctic_ingredients()
             ingredients = "".join(list(ingredients_msg)).split("\n\n")[-1]  # This stops any overflow from previous responses
-            ingredients_list = ingredientregex.sub("", ingredients).strip(" ").split(", ")      
+            ingredients_list = ingredientregex.sub("", ingredients).strip(" ").split(", ")
 
-            st.button("Save recipe", type="secondary", key="save", on_click=lambda recipe=Recipe("temp name", ingredients_list, None): save_recipe(recipe))      
+            st.button("Save recipe", type="secondary", key="save", on_click=lambda recipe=Recipe("temp name", ingredients_list, None): save_recipe(recipe))
 
             if mode_index == 1:
-
                 # Show the replace ingredients list
+                num_cols = 3
                 with st.expander("Replace ingredient:"):
+                    icols = [i for i in st.columns(num_cols)]
+                    index = 0
                     for ingredient in ingredients_list:
                         if ingredient in INGREDIENT_LIST:
-                            st.button(ingredient, type="secondary", key=ingredient, on_click=lambda ingredient=ingredient: replace_ingredient(ingredient))
+                            icols[index%num_cols].button(ingredient, type="secondary", key=ingredient, on_click=lambda ingredient=ingredient: replace_ingredient(ingredient))
+                            index += 1
 
 # User-provided prompt
 prompt = st.chat_input(disabled=not replicate_api, on_submit=generate_arctic_response, placeholder="Enter your ingredients here")

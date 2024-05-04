@@ -108,7 +108,7 @@ with st.sidebar:
     st.divider()
 
     st.caption(':red[_For any health-related concerns, including allergy information, please consult a qualified medical expert or your personal physician. Never rely solely on the advice of an AI language model for matters concerning your well-being._]')
-    st.caption('Built by [Snowflake](https://snowflake.com/) to demonstrate [Snowflake Arctic](https://www.snowflake.com/blog/arctic-open-and-efficient-foundation-language-models-snowflake). App hosted on [Streamlit Community Cloud](https://streamlit.io/cloud). Model hosted by [Replicate](https://replicate.com/snowflake/snowflake-arctic-instruct).')
+    # st.caption('Built by [Snowflake](https://snowflake.com/) to demonstrate [Snowflake Arctic](https://www.snowflake.com/blog/arctic-open-and-efficient-foundation-language-models-snowflake). App hosted on [Streamlit Community Cloud](https://streamlit.io/cloud). Model hosted by [Replicate](https://replicate.com/snowflake/snowflake-arctic-instruct).')
 
 
 @st.cache_resource(show_spinner=False)
@@ -200,12 +200,13 @@ def save_recipe(recipe):
         st.session_state.recipes = []
     
     st.session_state.recipes.append(recipe)
+    for recipe in st.session_state.recipes:
+        print(recipe)
 
 # clears all saved recipes, if any are saved
 def clear_recipes():
     if "recipes" in st.session_state:
         st.session_state.recipes = []
-
 
 # Generates the regular response and the ingredients list
 def generate_display_info():

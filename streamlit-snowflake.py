@@ -77,7 +77,6 @@ with st.sidebar:
     # Chef personality selector
     option = st.selectbox('Please select a chef:', CHEF_LIST, help="This determines what personality the chat bot has when creating recipes.", on_change=clear_chat_history)
     index = CHEF_LIST.index(option)
-    st.session_state.messages[0]["content"] = START_MESSAGES[index]
 
     # Mode selection
     mode = st.radio("Select a mode", MODE_LIST, on_change=clear_chat_history)
@@ -86,7 +85,7 @@ with st.sidebar:
 # Store LLM-generated responses
 if "messages" not in st.session_state.keys():
     st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[index]}]
-
+st.session_state.messages[0]["content"] = START_MESSAGES[index]
 # Create container for messages area
 container = st.container()
 

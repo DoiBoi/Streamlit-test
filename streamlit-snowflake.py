@@ -65,17 +65,13 @@ with st.sidebar:
 
     st.subheader("Options")
 
-    # temperature = 3     # This is the "creativity" of the response (higher is more creative, less is predictable)
-    # top_p = 0.1         # This is the next token's probability threshold (lower makes more sense)
-
-    #! We remove these sliders once we tune it
-    temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=5.0, value=3.0, step=0.01)
-    top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.1, step=0.01)
+    temperature = 3     # This is the "creativity" of the response (higher is more creative, less is predictable)
+    top_p = 0.1         # This is the next token's probability threshold (lower makes more sense)
 
     # Chef personality selector
     option = st.selectbox('Please select a chef:', CHEF_LIST, help="This determines what personality the chat bot has when creating recipes.", on_change=clear_chat_history)
     index = CHEF_LIST.index(option)
-    st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[index]}]
+    st.session_state.messages[0]["content"] = START_MESSAGES[index]
 
     # Mode selection
     mode = st.radio("Select a mode", MODE_LIST, on_change=clear_chat_history)

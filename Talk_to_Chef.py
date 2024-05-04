@@ -5,7 +5,7 @@ from transformers import AutoTokenizer
 import re
 
 # Set assistant icon to Snowflake logo
-icons = {"assistant": "./chef-hat.svg", "user": "👨‍🍳"}
+icons = {"assistant": "./resources/chef-hat.svg", "user": "👨‍🍳"}
 
 DEFAULT_PROMPT = ["You are a helpful chef",
                   "You are a famous, condescending chef defined by his fiery temper, aggressive behaviour, strict demeanour, and frequent usage of profane language, while making blunt, critical, and controversial comments, including insults and sardonic wisecracks about contestants and their cooking abilities." ,
@@ -32,13 +32,13 @@ START_MESSAGES = ["Hi, I'm an language model trained to be your personal chef! A
                   "Hey buddy, my main man! Ready to have some fun in the kitchen? Let's make something so tasty, it'll make your taste buds dance like they've never danced before.",
                   "Welcome to the burger joint, my friend! What can I get started for you today?"]
 
-EXAMPLES = ['*Eggs, flour, milk, vanilla extract, baking soda, baking powder, butter, sugar, salt.*',
+EXAMPLES = ['Eggs, flour, milk, vanilla extract, baking soda, baking powder, butter, sugar, salt.',
             'Bolognese']
 
 # This is used to check that all the ingredients detected are valid
 # https://github.com/schollz/food-identicon/blob/master/ingredients.txt
 INGREDIENT_LIST = []
-with open("ingredients_list.txt", mode="r") as file:
+with open("resources/ingredients_list.txt", mode="r") as file:
     lines = file.read().split("\n")
     INGREDIENT_LIST = lines
 
@@ -103,7 +103,7 @@ with st.sidebar:
     st.subheader("About")
     st.caption(ABOUT_MESSAGES[mode_index])
     st.caption("Here's an example message:")
-    st.caption(EXAMPLES[mode_index])
+    st.caption(f"*{EXAMPLES[mode_index]}*")
 
     st.divider()
 
@@ -211,7 +211,7 @@ def clear_recipes():
 # Generates the regular response and the ingredients list
 def generate_display_info():
     with container:
-        with st.chat_message("assistant", avatar="./chef-hat.svg"):
+        with st.chat_message("assistant", avatar=icons["assistant"]):
             response = generate_arctic_response()
             full_response = st.write_stream(response)
 

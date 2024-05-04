@@ -264,7 +264,7 @@ def generate_display_info():
             ingredients_list = ingredientregex.sub("", ingredients).strip(" ").split(", ")
 
             name_msg = generate_arctic_name()
-            name = "".join(list(name_msg)).split("\n\n")[-1] # may or may not be needed
+            name = "".join(list(name_msg)).split("\n\n")[-1] 
 
             # Make everything capitalized to stop issues and format nicer
             ingredient_list = [i.capitalize() for i in ingredients_list]
@@ -275,7 +275,7 @@ def generate_display_info():
                 if ingredient in INGREDIENT_LIST:
                     ingredients_list.append(ingredient)
 
-            st.button("Save recipe", type="secondary", key="save", on_click=lambda recipe=Recipe(name_msg, ingredients_list, full_response): save_recipe(recipe))
+            st.button("Save recipe", type="secondary", key="save", on_click=lambda recipe=Recipe(name, ingredients_list, full_response): save_recipe(recipe))
 
             if mode_index == 1:
                 # Show the replace ingredients list

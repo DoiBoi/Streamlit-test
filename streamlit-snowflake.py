@@ -52,26 +52,25 @@ def clear_chat_history():
 with st.sidebar:
     st.title('PERSONAL CHEF :cook:')
     if 'REPLICATE_API_TOKEN' in st.secrets:
-        # st.success('API token loaded!', icon='✅')
         replicate_api = st.secrets['REPLICATE_API_TOKEN']
     else:
         replicate_api = st.text_input('Enter Replicate API token:', type='password')
         if not (replicate_api.startswith('r8_') and len(replicate_api)==40):
-            st.warning('Please enter your Replicate API token.', icon='⚠️')
+            st.warning('Whoops, something went wrong! Please enter your Replicate API token.', icon='⚠️')
             st.markdown("**Don't have an API token?** Head over to [Replicate](https://replicate.com) to sign up for one.")
         else:
-           st.success('API token loaded!', icon='✅')
+            st.success('API token loaded!', icon='✅')
 
     os.environ['REPLICATE_API_TOKEN'] = replicate_api
 
     st.subheader("Options")
 
-    temperature = 3     # This is the "creativity" of the response (higher is more creative, less is predictable)
-    top_p = 0.1         # This is the next token's probability threshold (lower makes more sense)
+    # temperature = 3     # This is the "creativity" of the response (higher is more creative, less is predictable)
+    # top_p = 0.1         # This is the next token's probability threshold (lower makes more sense)
 
     #! We remove these sliders once we tune it
-    # temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=5.0, value=3, step=0.01)
-    # top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.1, step=0.01)
+    temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=5.0, value=3.0, step=0.01)
+    top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.1, step=0.01)
 
     # Chef personality selector
     option = st.selectbox('Please select a chef:', CHEF_LIST, help="This determines what personality the chat bot has when creating recipes.", on_change=clear_chat_history)

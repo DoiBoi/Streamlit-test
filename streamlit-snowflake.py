@@ -25,7 +25,14 @@ MODE_LIST = ["Find recipe for ingredients", "Search recipe for dish"]
 ABOUT_MESSAGES = ['This chat bot is designed to give you recipe suggestions based on ingredients you have. To use it, simply write each of your ingredients separated by commas.',
                   'This chat bot is designed to give you a recipe based on the dish you provide. To use it, simply enter the name of your dish.']
 
-EXAMPLES = ['Eggs, flour, milk, vanilla extract, baking soda, baking powder, butter, sugar, salt.',
+START_MESSAGES = ["Hi, I'm an language model trained to be your personal chef! Ask me about any recipe or anything food related.",
+                  "Right, let's get one thing straight - cooking isn't just about throwing ingredients together and hoping for the best. It's an art form, and I expect nothing but perfection from you. Now, let's get started!",
+                  "Welcome, my friend! Are you ready to take your taste buds on a wild ride? Let's dive into the world of flavor and create something that'll make your mouth water!",
+                  "Hello there! Let's cook up a storm together, using fresh ingredients and simple techniques to create a delicious meal that'll bring smiles to everyone's faces. Ready to get started?",
+                  "Hey buddy, my main man! Ready to have some fun in the kitchen? Let's make something so tasty, it'll make your taste buds dance like they've never danced before.",
+                  "Welcome to the burger joint, my friend! What can I get started for you today?"]
+
+EXAMPLES = ['*Eggs, flour, milk, vanilla extract, baking soda, baking powder, butter, sugar, salt.*',
             'Bolognese']
 
 # This is used to check that all the ingredients detected are valid
@@ -38,9 +45,8 @@ with open("ingredients_list.txt", mode="r") as file:
 # App title
 st.set_page_config(page_title="Personal Chef", page_icon="👨‍🍳")
 
-start_message = "Hi, I'm an language model trained to be your personal chef! Ask me about any recipe or anything food related."
 def clear_chat_history():
-    st.session_state.messages = [{"role": "assistant", "content": start_message}]
+    st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[index]}]
 
 # Replicate Credentials
 with st.sidebar:
@@ -68,18 +74,17 @@ with st.sidebar:
     # top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.1, step=0.01)
 
     # Chef personality selector
-    option = st.selectbox('Please select a chef:', CHEF_LIST, on_change=clear_chat_history)
+    option = st.selectbox('Please select a chef:', CHEF_LIST, help="This determines what personality the chat bot has when creating recipes.", on_change=clear_chat_history)
     index = CHEF_LIST.index(option)
+    st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[index]}]
 
     # Mode selection
     mode = st.radio("Select a mode", MODE_LIST, on_change=clear_chat_history)
     mode_index = MODE_LIST.index(mode)
 
-start_message = "Hi, I'm an language model trained to be your personal chef! Ask me about any recipe or anything food related."
-
 # Store LLM-generated responses
 if "messages" not in st.session_state.keys():
-    st.session_state.messages = [{"role": "assistant", "content": start_message}]
+    st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[index]}]
 
 # Create container for messages area
 container = st.container()

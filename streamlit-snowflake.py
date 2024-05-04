@@ -17,7 +17,7 @@ DEFAULT_PROMPT = ["You are a helpful chef",
 CHEF_LIST = ["Default","Gordon Ramsay", "Guy Fieri", "Jamie Oliver", "Uncle Roger", "Burger Guy"]
 
 MODE_PROMPT = ["Additionally, the user will give a list of ingredients and you are tasked to provide the user a recipe," +
-                  " please restrain the recipe to what the user has listed. Even if it is just one ingredient, please try to come up with a recipe.",
+                  " please restrain the recipe to what the user has listed: do not add any other ingredients than what the user has given. Even if it is just one ingredient, please try to come up with a recipe.",
                 "Additionally, the user will provide the name of a meal and you are tasked to provide a recipe for that meal in the form of: Ingredients: <list of ingredients separated by a new line> Instructions: <List of instructions for the recipe>"]
 
 MODE_LIST = ["Find recipe for ingredients", "Search recipe for dish"]

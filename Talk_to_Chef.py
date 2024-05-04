@@ -49,14 +49,14 @@ class Recipe:
         # self.instructions = instructions # to be implemented later, need to extract just the instructions from the ai response
 
 # App title
-st.set_page_config(page_title="Personal Chef", page_icon="👨‍🍳")
+st.set_page_config(page_title="Chef Chat", page_icon="👨‍🍳")
 
 def clear_chat_history():
     st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[index]}]
 
 # Replicate Credentials
+st.title('CHEF CHAT :cook:')
 with st.sidebar:
-    st.title('PERSONAL CHEF :cook:')
     if 'REPLICATE_API_TOKEN' in st.secrets:
         replicate_api = st.secrets['REPLICATE_API_TOKEN']
     else:

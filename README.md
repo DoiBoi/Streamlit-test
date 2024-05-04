@@ -6,6 +6,7 @@ Hackathon Team:
 
 - **Jordan Lieu**: 2nd year UBC, professional learner
 - **Sooraj Sannabhadti**: 1st year UBC
+- **Ethan Huynh-Younus**: 2nd year UBC
 
 Technologies used:
 

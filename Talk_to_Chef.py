@@ -20,7 +20,7 @@ MODE_PROMPT = ["Additionally, the user will give a list of ingredients and you a
                   " please restrain the recipe to what the user has listed: do not add any other ingredients than what the user has given. Even if it is just one ingredient, please try to come up with a recipe. You may comment on the recipe beforehand, but the recipe must be in the form of: Ingredients: <list of ingredients separated by a new line> Instructions: <List of instructions for the recipe>",
                 "Additionally, the user will provide the name of a meal and you are tasked to provide a recipe for that meal in the form of: Ingredients: <list of ingredients separated by a new line> Instructions: <List of instructions for the recipe>"]
 
-MODE_LIST = ["Find recipe for ingredients", "Search recipe for dish"]
+MODE_LIST = ["Create recipe from ingredients", "Create recipe for dish"]
 
 ABOUT_MESSAGES = ['This chat bot is designed to give you recipe suggestions based on ingredients you have. To use it, simply write each of your ingredients separated by commas.',
                   'This chat bot is designed to give you a recipe based on the dish you provide. To use it, simply enter the name of your dish.']
@@ -40,13 +40,20 @@ EXAMPLES = ['Eggs, flour, milk, vanilla extract, baking soda, baking powder, but
 INGREDIENT_LIST = []
 with open("resources/ingredients_list.txt", mode="r") as file:
     lines = file.read().split("\n")
-    INGREDIENT_LIST = lines
+    INGREDIENT_LIST = [i.capitalize() for i in lines]
 
 class Recipe:
-    def __init__(self, name, ingredients, instructions):
+    def __init__(self, name, ingredients, full_recipe):
         self.name = name
         self.ingredients = ingredients
-        # self.instructions = instructions # to be implemented later, need to extract just the instructions from the ai response
+        self.full_recipe = full_recipe
+
+        self.instructions = self.generateInstructions(full_recipe)
+
+    #TODO: Generate the instructions by passing it to another ai (because the original recipe could be formatted weirdly)
+    def generateInstructions(self, recipe):
+        instruction_list = recipe.split("\n")
+        return instruction_list
 
 # App title
 st.set_page_config(page_title="Home - Chef Chat", page_icon="👨‍🍳")
@@ -55,7 +62,6 @@ def clear_chat_history():
     st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[index]}]
 
 # Replicate Credentials
-st.title('CHEF CHAT :cook:')
 with st.sidebar:
     if 'REPLICATE_API_TOKEN' in st.secrets:
         replicate_api = st.secrets['REPLICATE_API_TOKEN']
@@ -69,7 +75,17 @@ with st.sidebar:
 
     os.environ['REPLICATE_API_TOKEN'] = replicate_api
 
-    st.subheader("Options")
+
+    # DESIGN ELEMENTS
+    st.title('CHEF CHAT :cook:')
+
+    # Navigation area
+    st.header("Navigation")
+    st.page_link("pages/saved_recipes.py", label="Saved Recipes", icon="📃")
+
+    st.divider()
+
+    st.header("Options")
 
     temperature = 3     # This is the "creativity" of the response (higher is more creative, less is predictable)
     top_p = 0.1         # This is the next token's probability threshold (lower makes more sense)
@@ -82,10 +98,25 @@ with st.sidebar:
     mode = st.radio("Select a mode", MODE_LIST, on_change=clear_chat_history)
     mode_index = MODE_LIST.index(mode)
 
+    st.button('Clear chat', on_click=clear_chat_history, type="primary")
+
+    st.divider()
+
+    st.header("About")
+    st.markdown(ABOUT_MESSAGES[mode_index])
+    st.markdown("Here's an example message:")
+    st.markdown(f"*{EXAMPLES[mode_index]}*")
+
+    st.divider()
+
+    st.caption(':red[_For any health-related concerns, including allergy information, please consult a qualified medical expert or your personal physician. Never rely solely on the advice of an AI language model for matters concerning your well-being._]')
+    # st.caption('Built by [Snowflake](https://snowflake.com/) to demonstrate [Snowflake Arctic](https://www.snowflake.com/blog/arctic-open-and-efficient-foundation-language-models-snowflake). App hosted on [Streamlit Community Cloud](https://streamlit.io/cloud). Model hosted by [Replicate](https://replicate.com/snowflake/snowflake-arctic-instruct).')
+
 # Store LLM-generated responses
 if "messages" not in st.session_state.keys():
     st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[index]}]
 st.session_state.messages[0]["content"] = START_MESSAGES[index]
+
 # Create container for messages area
 container = st.container()
 
@@ -94,21 +125,6 @@ for message in st.session_state.messages:
     with container:
         with st.chat_message(message["role"], avatar=icons[message["role"]]):
             st.write(message["content"])
-
-with st.sidebar:
-    st.button('Clear chat', on_click=clear_chat_history, type="primary")
-
-    st.divider()
-
-    st.subheader("About")
-    st.caption(ABOUT_MESSAGES[mode_index])
-    st.caption("Here's an example message:")
-    st.caption(f"*{EXAMPLES[mode_index]}*")
-
-    st.divider()
-
-    st.caption(':red[_For any health-related concerns, including allergy information, please consult a qualified medical expert or your personal physician. Never rely solely on the advice of an AI language model for matters concerning your well-being._]')
-    # st.caption('Built by [Snowflake](https://snowflake.com/) to demonstrate [Snowflake Arctic](https://www.snowflake.com/blog/arctic-open-and-efficient-foundation-language-models-snowflake). App hosted on [Streamlit Community Cloud](https://streamlit.io/cloud). Model hosted by [Replicate](https://replicate.com/snowflake/snowflake-arctic-instruct).')
 
 
 @st.cache_resource(show_spinner=False)
@@ -187,7 +203,7 @@ def replace_ingredient(ingredient):
 
     # Add new user input to history
     with container:
-        with st.chat_message("user", avatar="👨‍🍳"):
+        with st.chat_message("user", avatar=icons["user"]):
             st.write(user_input["content"])
 
     # Generate new response
@@ -224,7 +240,16 @@ def generate_display_info():
             ingredients = "".join(list(ingredients_msg)).split("\n\n")[-1]  # This stops any overflow from previous responses
             ingredients_list = ingredientregex.sub("", ingredients).strip(" ").split(", ")
 
-            st.button("Save recipe", type="secondary", key="save", on_click=lambda recipe=Recipe("temp name", ingredients_list, None): save_recipe(recipe))
+            # Make everything capitalized to stop issues and format nicer
+            ingredient_list = [i.capitalize() for i in ingredients_list]
+
+            # Check if all the ingredients are actually valid
+            ingredients_list = []
+            for ingredient in ingredient_list:
+                if ingredient in INGREDIENT_LIST:
+                    ingredients_list.append(ingredient)
+
+            st.button("Save recipe", type="secondary", key="save", on_click=lambda recipe=Recipe("temp name", ingredients_list, full_response): save_recipe(recipe))
 
             if mode_index == 1:
                 # Show the replace ingredients list
@@ -233,16 +258,15 @@ def generate_display_info():
                     icols = [i for i in st.columns(num_cols)]
                     index = 0
                     for ingredient in ingredients_list:
-                        if ingredient in INGREDIENT_LIST:
-                            icols[index%num_cols].button(ingredient, type="secondary", key=ingredient, on_click=lambda ingredient=ingredient: replace_ingredient(ingredient))
-                            index += 1
+                        icols[index%num_cols].button(ingredient, type="secondary", key=ingredient, on_click=lambda ingredient=ingredient: replace_ingredient(ingredient))
+                        index += 1
 
 # User-provided prompt
 prompt = st.chat_input(disabled=not replicate_api, on_submit=generate_arctic_response, placeholder="Enter your ingredients here")
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     with container:
-        with st.chat_message("user", avatar="👨‍🍳"):
+        with st.chat_message("user", avatar=icons["user"]):
             st.write(prompt)
 
 # Regex for getting just ingredients

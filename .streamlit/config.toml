@@ -1,0 +1,17 @@
+[client]
+caching = true
+displayEnabled = true
+#! Uncomment these when we're done
+# showErrorDetails = false
+# toolbarMode = "minimal"
+showSidebarNavigation = false
+
+[runner]
+fastReruns = true
+
+[theme]
+base = "dark"
+primaryColor = "#ff3b3b"
+backgroundColor = "#0e1117"
+secondaryBackgroundColor = "#262628"
+textColor = "white"

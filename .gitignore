@@ -161,5 +161,4 @@ cython_debug/
 
 # Custom files and folders to ignore
 # Probably not the entire folder as there can be the configuration file
-.streamlit/
 secrets.toml

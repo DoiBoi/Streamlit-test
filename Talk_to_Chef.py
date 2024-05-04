@@ -264,7 +264,7 @@ def generate_display_info():
             ingredients_list = ingredientregex.sub("", ingredients).strip(" ").split(", ")
 
             name_msg = generate_arctic_name()
-            # name = "".join(list(name_msg)).split("\n\n")[-1] # may or may not be needed
+            name = "".join(list(name_msg)).split("\n\n")[-1] # may or may not be needed
 
             # Make everything capitalized to stop issues and format nicer
             ingredient_list = [i.capitalize() for i in ingredients_list]

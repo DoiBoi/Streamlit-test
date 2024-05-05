@@ -50,17 +50,10 @@ with open("resources/ingredients_list.txt", mode="r") as file:
     INGREDIENT_LIST = [i.capitalize() for i in lines]
 
 class Recipe:
-    def __init__(self, name, ingredients, full_recipe):
+    def __init__(self, name, ingredients, instructions):
         self.name = name
         self.ingredients = ingredients
-        self.full_recipe = full_recipe
-
-        self.instructions = self.generateInstructions(full_recipe)
-
-    #TODO: Generate the instructions by passing it to another ai (because the original recipe could be formatted weirdly)
-    def generateInstructions(self, recipe):
-        instruction_list = recipe.split("\n")
-        return instruction_list
+        self.instructions = instructions.split("\n1. ")[-1].split("\n")
 
 # App title
 st.set_page_config(page_title="Home - Chef Chat", page_icon="👨‍🍳")
@@ -323,7 +316,7 @@ def generate_display_info():
                 if ingredient in INGREDIENT_LIST:
                     ingredients_list.append(ingredient)
 
-            st.button("Save recipe", type="secondary", key="save", on_click=lambda recipe=Recipe(name, ingredients_list, full_response): save_recipe(recipe))
+            st.button("Save recipe", type="secondary", key="save", on_click=lambda recipe=Recipe(name, ingredients_list, method_response): save_recipe(recipe))
 
             if mode_index == 1:
                 # Show the replace ingredients list

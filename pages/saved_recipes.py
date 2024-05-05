@@ -1,7 +1,9 @@
+import string
 import streamlit as st
 import replicate
 import os
 from transformers import AutoTokenizer
+import random
 
 st.set_page_config(
     page_title="Saved Recipes - Chef Chat",
@@ -60,7 +62,7 @@ with viewing_container:
                     st.subheader("Ingredients")
                     for ingredient in recipe.ingredients:
                         if ingredient in INGREDIENT_LIST:
-                            st.write(ingredient)
+                            st.write(f"- {ingredient}")
 
                 # Method section
                 with rcol2:
@@ -68,4 +70,5 @@ with viewing_container:
                     for step in recipe.instructions:
                         st.write(step)
 
-                st.button("Download recipe as PDF")
+                st.button("Download recipe as PDF", key="".join(random.choice(string.lowercase) for i in range(128)))
+                st.button("Delete recipe", key="".join(random.choice(string.lowercase) for i in range(128)))

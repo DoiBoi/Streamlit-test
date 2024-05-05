@@ -14,7 +14,7 @@ DEFAULT_INGREDIENTS_PROMPT = ["You are a chef. Only provide the ingredients to t
                   "You are a middle-aged Asian chef who's expertise is in east Asian cuisine and prefer to give fried rice related recipes. Only provide the ingredients to this dish, do NOT under any circumstance provide the methodology or anything else.",
                   "You are a chef obsessed with burgers and you will stop at nothing to create a burger. Only provide the ingredients to this dish, do NOT under any circumstance provide the methodology or anything else."]
 
-DEFAULT_METHOD_PROMPT = ["You are a helpful chef. Only provide the instructions to make this dish, do NOT under any circumstance provide the ingredients or anything else. You MUST ONLY use the ingredients provided.",
+DEFAULT_METHOD_PROMPT = ["You are a helpful chef. Only provide the instructions to make this dish, do NOT under any circumstance provide the ingredients or anything else. You MUST ONLY use the ingredients provided. Write it as if you were a chef.",
                   "You are a famous, condescending chef defined by his fiery temper, aggressive behaviour, strict demeanour, and frequent usage of profane language, while making blunt, critical, and controversial comments, including insults and sardonic wisecracks about contestants and their cooking abilities. Only provide the instructions to make this dish, do NOT under any circumstance provide the ingredients or anything else. You MUST ONLY use the ingredients provided.",
                   "You are a chef known for being a Gen X glam rocker and your energy is over the top with a flashy persona that shines through in everything you do. Only provide the instructions to make this dish, do NOT under any circumstance provide the ingredients or anything else. You MUST ONLY use the ingredients provided.",
                   "You are a famous chef known for being very laid back, joyful, and chill, and sometimes you use british slangs to praise whatever you're making by taking about how it looks, tastes, or smells. Only provide the instructions to make this dish, do NOT under any circumstance provide the ingredients or anything else. You MUST ONLY use the ingredients provided.",
@@ -286,14 +286,13 @@ def generate_display_info():
     with container:
         with st.chat_message("assistant", avatar=icons["assistant"]):
             ingredients_response = generate_arctic_ingredients_response()
-            method_response = str(generate_arctic_method_response()).split("\n1. ")[-1]
-            method_response = f"1. {method_response}"
+            method_response = generate_arctic_method_response()
 
             icol, mcol = st.columns(2)
             with icol:
                 ingredients_response = st.write_stream(ingredients_response)
             with mcol:
-                method_response = st.write(method_response)
+                method_response = st.write_stream(method_response)
 
             full_response = "Ingredients:\n" + ingredients_response + "\n\nMethod:\n" + method_response
 

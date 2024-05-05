@@ -286,7 +286,8 @@ def generate_display_info():
     with container:
         with st.chat_message("assistant", avatar=icons["assistant"]):
             ingredients_response = generate_arctic_ingredients_response()
-            method_response = f"1. {str(generate_arctic_method_response()).split('\n1. ')[-1]}"
+            method_response = str(generate_arctic_method_response()).split("\n1. ")[-1]
+            method_response = f"1. {method_response}"
 
             icol, mcol = st.columns(2)
             with icol:

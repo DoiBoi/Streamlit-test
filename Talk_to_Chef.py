@@ -54,7 +54,8 @@ class Recipe:
     def __init__(self, name, ingredients, instructions, full_recipe):
         self.name = name
         self.ingredients = ingredients
-        self.instructions = f'1. {instructions.split("\n1. ")[-1]}'.split("\n")
+        instructions = instructions.split("\n1. ")[-1]
+        self.instructions = f'1. {instructions}'.split("\n")
         self.full_recipe = full_recipe
 
     #TODO: Add any tags that might be useful for filtering in the saved recipes page

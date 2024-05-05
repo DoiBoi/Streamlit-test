@@ -14,6 +14,24 @@ st.title("Saved Recipes 📃")
 
 SORT_OPTIONS = ["Number of ingredients", "Preparation time"]
 
+def reset_options():
+    st.session_state.filters = {
+        "veg": True,
+        "dairy": True,
+        "min time": 0,
+        "max time": 120,
+        "sort by": 0
+        }
+
+def delete_all_recipes():
+    st.session_state.recipes = []
+
+def remove_recipe(name):
+    for index, recipe in enumerate(st.session_state.recipes):
+        if recipe.name == name:
+            st.session_state.recipes.pop(index)
+            break
+
 # Create sidebar
 with st.sidebar:
     st.title('CHEF CHAT :cook:')
@@ -25,12 +43,40 @@ with st.sidebar:
 
     st.header("Filters")
     st.subheader("Categories")
-    veg = st.checkbox("Non-vegetarian", value=True)
-    dairy = st.checkbox("Dairy", value=True)
-    min_time, max_time = st.select_slider("Total preparation & cook time (minutes)", options=[i for i in range(0, 121, 5)], value=[0, 120])
+
+    if "filters" not in st.session_state.keys():
+        st.session_state.filters = {
+            "veg": True,
+            "dairy": True,
+            "min time": 0,
+            "max time": 120,
+            "sort by": 0
+            }
+
+    veg = st.checkbox("Non-vegetarian", value=st.session_state.filters["veg"])
+    dairy = st.checkbox("Dairy", value=st.session_state.filters["dairy"])
+    min_time, max_time = st.select_slider("Total preparation & cook time (minutes)",
+                                          options=[i for i in range(0, 121, 5)],
+                                          value=[st.session_state.filters["min time"], st.session_state.filters["max time"]]
+                                          )
+
+    st.session_state.filters["veg"] = veg
+    st.session_state.filters["dairy"] = dairy
+    st.session_state.filters["min time"] = min_time
+    st.session_state.filters["max time"] = max_time
 
     st.subheader("Sort by")
-    st.radio("Sort by", options=SORT_OPTIONS, label_visibility="collapsed")
+    sort = st.radio("Sort by", options=SORT_OPTIONS, index=st.session_state.filters["sort by"], label_visibility="collapsed")
+
+    st.session_state.filters["sort by"] = SORT_OPTIONS.index(sort)
+
+    st.button("Reset filters", type="secondary", on_click=reset_options)
+
+    col1, col2 = st.columns(2)
+    clear_all = col1.button("Clear all recipes", type="primary")
+
+    if clear_all:
+        clear_all = col2.button("Confirm delete", type="secondary", on_click=delete_all_recipes)
 
     st.divider()
 
@@ -70,5 +116,10 @@ with viewing_container:
                     for step in recipe.instructions:
                         st.write(step)
 
-                st.button("Download recipe as PDF", key="".join(random.choice(string.ascii_lowercase) for i in range(128)))
-                st.button("Delete recipe", key="".join(random.choice(string.ascii_lowercase) for i in range(128)))
+                st.download_button("Download recipe as PDF",
+                                   mime="application/pdf",
+                                   data=lambda recipe=recipe: recipe.make_pdf(),
+                                   key="".join(random.choice(string.ascii_lowercase) for i in range(128)))
+                st.button("Delete recipe",
+                          key="".join(random.choice(string.ascii_lowercase) for i in range(128)),
+                          on_click=lambda recipe=recipe: remove_recipe(recipe.name))

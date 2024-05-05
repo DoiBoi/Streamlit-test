@@ -1,8 +1,9 @@
-import streamlit as st
-import replicate
-import os
+import streamlit as st  # For website generation
+import replicate        # For accessing AI model API
+import os               # For opening external text files
 from transformers import AutoTokenizer
-import re
+import re               # For cleaning AI responses
+from fpdf import FPDF   # For PDF generation
 
 # Set assistant icon to Snowflake logo
 icons = {"assistant": "./resources/chef-hat.svg", "user": "👨‍🍳"}
@@ -50,16 +51,62 @@ with open("resources/ingredients_list.txt", mode="r") as file:
     INGREDIENT_LIST = [i.capitalize() for i in lines]
 
 class Recipe:
-    def __init__(self, name, ingredients, instructions):
+    def __init__(self, name, ingredients, instructions, full_recipe):
         self.name = name
         self.ingredients = ingredients
         self.instructions = instructions.split("\n1. ")[-1].split("\n")
+        self.full_recipe = full_recipe
+
+    #TODO: Add any tags that might be useful for filtering in the saved recipes page
+    def generate_tags(self):
+        self.num_of_ingredients = len(self.ingredients)
+        self.tags = []
+
+    def make_pdf(self):
+        # Make the components into strings
+        ingredients = "\n- ".join(self.ingredients)
+        ingredients = f"- {ingredients}"
+        instructions = "\n".join(self.instructions)
+
+        # Initialise PDF generator
+        pdf = FPDF(format="A4")
+        pdf.add_page()
+
+        # Title
+        pdf.set_font('Helvetica', size=24, style="BI")
+        pdf.multi_cell(text="Recipe Name", w=210/2, padding=5, new_x="LEFT", new_y="NEXT")
+
+        # Main body
+        column_width = 190/2
+        pdf.set_font('Helvetica', size=18, style="B")
+        pdf.multi_cell(text="Ingredients", w=column_width, new_x="RIGHT", new_y="TOP", padding=3)
+        pdf.multi_cell(text="Method", w=column_width, new_x="LMARGIN", new_y="NEXT", padding=3)
+        pdf.set_font('Helvetica', size=11, style="")
+        pdf.multi_cell(w=column_width, h=5, new_x="RIGHT", new_y="TOP", text=ingredients)
+        pdf.multi_cell(w=column_width, h=5, new_x="LEFT", new_y="TOP", text=instructions)
+
+        # Output final PDF
+        pdf_output = pdf.output()
+        return pdf_output
 
 # App title
 st.set_page_config(page_title="Home - Chef Chat", page_icon="👨‍🍳")
 
 def clear_chat_history():
     st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[index]}]
+
+def reset_options():
+    st.session_state.personality_option = 0
+    st.session_state.mode_option = 0
+
+def set_mode(val):
+    print(val)
+    st.session_state.mode_option = val
+    clear_chat_history()
+def set_person(val):
+    print(val)
+    st.session_state.personality_option = val
+    clear_chat_history()
 
 # Replicate Credentials
 with st.sidebar:
@@ -91,20 +138,23 @@ with st.sidebar:
     top_p = 0.1         # This is the next token's probability threshold (lower makes more sense)
 
     # Chef personality selector
-    if "personality_option" not in st.session_state:
+    if "personality_option" not in st.session_state.keys():
         st.session_state.personality_option = 0
     option = st.selectbox('Please select a chef:', CHEF_LIST, index=st.session_state.personality_option, help="This determines what personality the chat bot has when creating recipes.", on_change=clear_chat_history)
     index = CHEF_LIST.index(option)
     st.session_state.personality_option = index
 
     # Mode selection
-    if "mode_option" not in st.session_state:
+    if "mode_option" not in st.session_state.keys():
         st.session_state.mode_option = 0
-    mode = st.radio("Select a mode", MODE_LIST, index=st.session_state.mode_option, on_change=clear_chat_history)
+    mode = st.radio("Select a mode", MODE_LIST, index=st.session_state.mode_option)
     mode_index = MODE_LIST.index(mode)
-    st.session_state.mode_option = mode_index
+    if st.session_state.mode_option != mode_index:
+        st.session_state.mode_option = mode_index
 
-    st.button('Clear chat', on_click=clear_chat_history, type="primary")
+    col1, col2 = st.columns(2)
+    col1.button("Reset options", on_click=reset_options, type="secondary")
+    col2.button('Clear chat', on_click=clear_chat_history, type="primary")
 
     st.divider()
 

@@ -121,7 +121,9 @@ with viewing_container:
                 st.download_button("Download recipe as PDF",
                                    mime="application/pdf",
                                    data=pdf,
-                                   key="".join(random.choice(string.ascii_lowercase) for i in range(128)))
+                                   key="".join(random.choice(string.ascii_lowercase) for i in range(128)),
+                                   file_name=recipe.name)
                 st.button("Delete recipe",
+                          type="primary",
                           key="".join(random.choice(string.ascii_lowercase) for i in range(128)),
                           on_click=lambda recipe=recipe: remove_recipe(recipe.name))

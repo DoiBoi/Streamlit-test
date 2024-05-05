@@ -91,12 +91,18 @@ with st.sidebar:
     top_p = 0.1         # This is the next token's probability threshold (lower makes more sense)
 
     # Chef personality selector
-    option = st.selectbox('Please select a chef:', CHEF_LIST, help="This determines what personality the chat bot has when creating recipes.", on_change=clear_chat_history)
+    if "personality_option" not in st.session_state:
+        st.session_state.personality_option = 0
+    option = st.selectbox('Please select a chef:', CHEF_LIST, index=st.session_state.personality_option, help="This determines what personality the chat bot has when creating recipes.", on_change=clear_chat_history)
     index = CHEF_LIST.index(option)
+    st.session_state.personality_option = index
 
     # Mode selection
-    mode = st.radio("Select a mode", MODE_LIST, on_change=clear_chat_history)
+    if "mode_option" not in st.session_state:
+        st.session_state.mode_option = 0
+    mode = st.radio("Select a mode", MODE_LIST, index=st.session_state.mode_option, on_change=clear_chat_history)
     mode_index = MODE_LIST.index(mode)
+    st.session_state.mode_option = mode_index
 
     st.button('Clear chat', on_click=clear_chat_history, type="primary")
 

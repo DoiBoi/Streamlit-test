@@ -116,9 +116,11 @@ with viewing_container:
                     for step in recipe.instructions:
                         st.write(step)
 
+                pdf = recipe.make_pdf()
+
                 st.download_button("Download recipe as PDF",
                                    mime="application/pdf",
-                                   data=lambda recipe=recipe: recipe.make_pdf(),
+                                   data=pdf,
                                    key="".join(random.choice(string.ascii_lowercase) for i in range(128)))
                 st.button("Delete recipe",
                           key="".join(random.choice(string.ascii_lowercase) for i in range(128)),

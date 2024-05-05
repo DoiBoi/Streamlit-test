@@ -372,7 +372,7 @@ def generate_display_info():
                 if ingredient in INGREDIENT_LIST:
                     ingredients_list.append(ingredient)
 
-            st.button("Save recipe", type="secondary", key="save", on_click=lambda recipe=Recipe(name, ingredients_list, method_response): save_recipe(recipe))
+            st.button("Save recipe", type="secondary", key="save", on_click=lambda recipe=Recipe(name, ingredients_list, method_response, full_response): save_recipe(recipe))
 
             if mode_index == 1:
                 # Show the replace ingredients list

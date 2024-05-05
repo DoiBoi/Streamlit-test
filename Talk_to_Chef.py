@@ -286,13 +286,13 @@ def generate_display_info():
     with container:
         with st.chat_message("assistant", avatar=icons["assistant"]):
             ingredients_response = generate_arctic_ingredients_response()
-            method_response = generate_arctic_method_response()
+            method_response = f"1. {str(generate_arctic_method_response()).split('\n1. ')[-1]}"
 
             icol, mcol = st.columns(2)
             with icol:
                 ingredients_response = st.write_stream(ingredients_response)
             with mcol:
-                method_response = st.write_stream(method_response)
+                method_response = st.write(method_response)
 
             full_response = "Ingredients:\n" + ingredients_response + "\n\nMethod:\n" + method_response
 

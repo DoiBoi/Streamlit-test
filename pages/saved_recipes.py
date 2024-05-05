@@ -14,6 +14,8 @@ SORT_OPTIONS = ["Number of ingredients", "Preparation time"]
 
 # Create sidebar
 with st.sidebar:
+    st.title('CHEF CHAT :cook:')
+
     st.header("Navigation")
     st.page_link("Talk_to_Chef.py", label="Talk to Chef", icon="🍳")
 

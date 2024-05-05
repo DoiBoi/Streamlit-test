@@ -124,6 +124,8 @@ if "messages" not in st.session_state.keys():
     st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[index]}]
 st.session_state.messages[0]["content"] = START_MESSAGES[index]
 
+st.title("Talk to Chef 🍳")
+
 # Create container for messages area
 container = st.container()
 
@@ -288,10 +290,17 @@ def generate_display_info():
             ingredients_response = generate_arctic_ingredients_response()
             method_response = generate_arctic_method_response()
 
+            name_msg = generate_arctic_name()
+            name = "".join(list(name_msg)).split("\n\n")[-1]
+
+            st.header(name)
+
             icol, mcol = st.columns(2)
             with icol:
+                st.subheader("Ingredients")
                 ingredients_response = st.write_stream(ingredients_response)
             with mcol:
+                st.subheader("Method")
                 method_response = st.write_stream(method_response)
 
             full_response = "Ingredients:\n" + ingredients_response + "\n\nMethod:\n" + method_response
@@ -304,9 +313,6 @@ def generate_display_info():
             ingredients_msg = generate_arctic_ingredients()
             ingredients = "".join(list(ingredients_msg)).split("\n\n")[-1]  # This stops any overflow from previous responses
             ingredients_list = ingredientregex.sub("", ingredients).strip(" ").split(", ")
-
-            name_msg = generate_arctic_name()
-            name = "".join(list(name_msg)).split("\n\n")[-1]
 
             # Make everything capitalized to stop issues and format nicer
             ingredient_list = [i.capitalize() for i in ingredients_list]

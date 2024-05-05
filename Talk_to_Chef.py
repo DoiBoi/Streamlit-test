@@ -86,7 +86,7 @@ class Recipe:
         pdf.multi_cell(w=column_width, h=5, new_x="LEFT", new_y="TOP", text=instructions)
 
         # Output final PDF
-        pdf_output = pdf.output()
+        pdf_output = bytes(pdf.output())
         return pdf_output
 
 # App title

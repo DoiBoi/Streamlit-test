@@ -122,7 +122,7 @@ with viewing_container:
                                    mime="application/pdf",
                                    data=pdf,
                                    key="".join(random.choice(string.ascii_lowercase) for i in range(128)),
-                                   file_name=recipe.name)
+                                   file_name=f"{recipe.name} Recipe.pdf")
                 st.button("Delete recipe",
                           type="primary",
                           key="".join(random.choice(string.ascii_lowercase) for i in range(128)),

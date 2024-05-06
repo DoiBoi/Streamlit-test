@@ -79,7 +79,7 @@ class Recipe:
 
         # Title
         pdf.set_font('Helvetica', size=24, style="BI")
-        pdf.multi_cell(text="Recipe Name", w=210/2, padding=5, new_x="LEFT", new_y="NEXT")
+        pdf.multi_cell(text=self.name, w=210/2, padding=5, new_x="LEFT", new_y="NEXT")
 
         # Main body
         column_width = 190/2
@@ -206,7 +206,7 @@ def get_num_tokens(prompt):
 
 # Function for generating Snowflake Arctic responses
 # user_input is whether or not this response will depend on what the user has inputted (user_input = True)
-#                           or if it just depends on the previous response from the ai (user_input = False) 
+#                           or if it just depends on the previous response from the ai (user_input = False)
 def generate_arctic_response(given_prompt, temp, top, user_input):
     prompt = []
     prompt.append("<|im_start|>system\n" + given_prompt + "<|im_end|>\n")

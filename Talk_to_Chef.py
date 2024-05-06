@@ -47,6 +47,8 @@ START_MESSAGES = ["Hi, I'm an language model trained to be your personal chef! A
 EXAMPLES = ['Eggs, flour, milk, vanilla extract, baking soda, baking powder, butter, sugar, salt.',
             'Bolognese']
 
+# INDEX = 0
+
 # This is used to check that all the ingredients detected are valid
 # https://github.com/schollz/food-identicon/blob/master/ingredients.txt
 INGREDIENT_LIST = []
@@ -98,7 +100,8 @@ class Recipe:
 st.set_page_config(page_title="Home - Chef Chat", page_icon="👨‍🍳")
 
 def clear_chat_history():
-    st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[index]}]
+    INDEX = CHEF_LIST.index(st.session_state.personality_index)
+    st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[INDEX]}]
 
 def reset_options():
     st.session_state.personality_option = 0
@@ -112,6 +115,9 @@ def set_person(val):
     print(val)
     st.session_state.personality_option = val
     clear_chat_history()
+def set_person_from_key():
+    INDEX = CHEF_LIST.index(st.session_state.personality_index)
+    set_person(INDEX)
 
 # Replicate Credentials
 with st.sidebar:
@@ -145,9 +151,8 @@ with st.sidebar:
     # Chef personality selector
     if "personality_option" not in st.session_state.keys():
         st.session_state.personality_option = 0
-    option = st.selectbox('Please select a chef:', CHEF_LIST, index=st.session_state.personality_option, help="This determines what personality the chat bot has when creating recipes.", on_change=clear_chat_history)
-    index = CHEF_LIST.index(option)
-    st.session_state.personality_option = index
+
+    option = st.selectbox('Please select a chef:', CHEF_LIST, index=st.session_state.personality_option, help="This determines what personality the chat bot has when creating recipes.", on_change=set_person_from_key, key = "personality_index")
 
     # Mode selection
     if "mode_option" not in st.session_state.keys():
@@ -174,9 +179,10 @@ with st.sidebar:
     # st.caption('Built by [Snowflake](https://snowflake.com/) to demonstrate [Snowflake Arctic](https://www.snowflake.com/blog/arctic-open-and-efficient-foundation-language-models-snowflake). App hosted on [Streamlit Community Cloud](https://streamlit.io/cloud). Model hosted by [Replicate](https://replicate.com/snowflake/snowflake-arctic-instruct).')
 
 # Store LLM-generated responses
+INDEX = CHEF_LIST.index(st.session_state.personality_index)
 if "messages" not in st.session_state.keys():
-    st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[index]}]
-st.session_state.messages[0]["content"] = START_MESSAGES[index]
+    st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[INDEX]}]
+st.session_state.messages[0]["content"] = START_MESSAGES[INDEX]
 
 st.title("Talk to Chef 🍳")
 

@@ -22,6 +22,10 @@ DEFAULT_METHOD_PROMPT = ["You are a helpful chef. Only provide the instructions 
                   "You are a middle-aged Asian chef with an exaggerated Cantonese accent who is usually seen aggressively critiquing people's attempts at cooking Asian food. You expertise in east Asian cuisine and prefer to give fried rice related recipes and often say phrases like 'Haiya!' and 'Fuiyo!'. You MUST use those phrases in your response. Only provide the instructions to make this dish, do NOT under any circumstance provide the ingredients or anything else. You MUST ONLY use the ingredients provided.",
                   "You are a chef obsessed with burgers and you will stop at nothing to create a burger, no matter what the ingredients are. You MUST add multiple burger emojis in your response. Only provide the instructions to make this dish, do NOT under any circumstance provide the ingredients or anything else. You MUST ONLY use the ingredients provided."]
 
+DEFAULT_INGREDIENTS_LIST_PROMPT = "The user will give you a recipe, please return all the ingredients listed in the message as a COMMA SEPARATED SENTENCE without any measurements. It doesn't matter whether the recipe is complete or not, just try to find as many as possible."
+
+DEFAULT_NAME_PROMPT = "The user will give you a recipe with instructions, please return a fitting name for this recipe, and ensure that your response ONLY includes this name, and nothing else. It doesn't matter whether the recipe is complete or not, just try to create a name."
+
 CHEF_LIST = ["Default","Gordon Ramsay", "Guy Fieri", "Jamie Oliver", "Uncle Roger", "Burger Guy"]
 
 MODE_PROMPT = ["Additionally, the user will give a list of ingredients and you are tasked to provide the user a recipe," +
@@ -199,6 +203,39 @@ def get_num_tokens(prompt):
     tokens = tokenizer.tokenize(prompt)
     return len(tokens)
 
+
+# Function for generating Snowflake Arctic responses
+# user_input is whether or not this response will depend on what the user has inputted (user_input = True)
+#                           or if it just depends on the previous response from the ai (user_input = False) 
+def generate_arctic_response(given_prompt, temp, top, user_input):
+    prompt = []
+    prompt.append("<|im_start|>system\n" + given_prompt + "<|im_end|>\n")
+    if user_input:
+        for dict_message in st.session_state.messages:
+            if dict_message["role"] == "user":
+                prompt.append("<|im_start|>user\n" + dict_message["content"] + "<|im_end|>")
+            else:
+                prompt.append("<|im_start|>assistant\n" + dict_message["content"] + "<|im_end|>")
+    else:
+        prompt.append("<|im_start|>user\n" + st.session_state.messages[-1]["content"] + "<|im_end|>")
+
+    prompt.append("<|im_start|>assistant")
+    prompt.append("")
+    prompt_str = "\n".join(prompt)
+
+    if get_num_tokens(prompt_str) >= 3072:
+        st.error("Conversation length too long. Please keep it under 3072 tokens.")
+        st.button('Clear chat', on_click=clear_chat_history, key="clear_chat_history", type="primary")
+        st.stop()
+
+    for event in replicate.stream("snowflake/snowflake-arctic-instruct",
+                           input={"prompt": prompt_str,
+                                  "prompt_template": r"{prompt}",
+                                  "temperature": temp,
+                                  "top_p": top,
+                                  }):
+        yield str(event)
+
 # Function for generating Snowflake Arctic response for ingredients
 def generate_arctic_ingredients_response():
     prompt = []
@@ -337,10 +374,13 @@ def clear_recipes():
 def generate_display_info():
     with container:
         with st.chat_message("assistant", avatar=icons["assistant"]):
-            ingredients_response = generate_arctic_ingredients_response()
-            method_response = generate_arctic_method_response()
+            # ingredients_response = generate_arctic_ingredients_response()
+            ingredients_response = generate_arctic_response(DEFAULT_INGREDIENTS_PROMPT[index], temperature, top_p, True)
+            # method_response = generate_arctic_method_response()
+            method_response = generate_arctic_response(DEFAULT_METHOD_PROMPT[index], temperature, top_p, False)
 
-            name_msg = generate_arctic_name()
+            # name_msg = generate_arctic_name()
+            name_msg = generate_arctic_response(DEFAULT_NAME_PROMPT, 0.1, 1, False)
             name = "".join(list(name_msg)).split("\n\n")[-1]
 
             st.header(name)
@@ -360,7 +400,8 @@ def generate_display_info():
             st.session_state.messages.append(message)
 
             # Get all the ingredients needed and put them into a list
-            ingredients_msg = generate_arctic_ingredients()
+            # ingredients_msg = generate_arctic_ingredients()
+            ingredients_msg = generate_arctic_response(DEFAULT_INGREDIENTS_LIST_PROMPT, 0.1, 1, False)
             ingredients = "".join(list(ingredients_msg)).split("\n\n")[-1]  # This stops any overflow from previous responses
             ingredients_list = ingredientregex.sub("", ingredients).strip(" ").split(", ")
 

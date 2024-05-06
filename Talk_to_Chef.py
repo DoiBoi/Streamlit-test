@@ -372,6 +372,7 @@ def clear_recipes():
 
 # Generates the regular response and the ingredients list
 def generate_display_info():
+    global index
     with container:
         with st.chat_message("assistant", avatar=icons["assistant"]):
             # ingredients_response = generate_arctic_ingredients_response()

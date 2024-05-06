@@ -1,7 +1,7 @@
 from fpdf import FPDF
 
-instructions_list = ""
-ingredients_list = ""
+instructions_list = "1. Step one, do this\n2. Step two, do that.\n3. Step three, do some more stuff.\n4. Step four.\n5. Step five, you're done."
+ingredients_list = "Some ingredients are listed here\n\n- Rice\n- Burger\n- Cheese\n- Beef\n- Some other ingredient"
 
 # Initialise PDF generator
 pdf = FPDF(format="A4")
@@ -20,4 +20,7 @@ pdf.set_font('Helvetica', size=11, style="")
 pdf.multi_cell(w=column_width, h=5, new_x="RIGHT", new_y="TOP", text=ingredients_list)
 pdf.multi_cell(w=column_width, h=5, new_x="LEFT", new_y="TOP", text=instructions_list)
 
-pdf_output = pdf.output()
+# To save to variable
+pdf_output = bytes(pdf.output())
+# To save to file
+pdf.output("pdf_testing.pdf")

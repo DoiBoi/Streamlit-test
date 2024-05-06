@@ -67,7 +67,7 @@ class Recipe:
         # Make the components into strings
         ingredients = "\n- ".join(self.ingredients)
         ingredients = f"- {ingredients}"
-        instructions = "\n".join(self.instructions)
+        instructions = "\n\n".join(self.instructions)
 
         # Initialise PDF generator
         pdf = FPDF(format="A4")

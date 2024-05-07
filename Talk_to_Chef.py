@@ -2,7 +2,6 @@ import streamlit as st  # For website generation
 import replicate        # For accessing AI model API
 import os               # For opening external text files
 from transformers import AutoTokenizer
-import re               # For cleaning AI responses
 from Recipe import Recipe
 
 # Set assistant icon to Snowflake logo
@@ -328,8 +327,6 @@ def save_recipe(recipe):
         st.session_state.recipes = []
 
     st.session_state.recipes.append(recipe)
-    for recipe in st.session_state.recipes:
-        print(recipe)
 
 # clears all saved recipes, if any are saved
 def clear_recipes():
@@ -368,14 +365,11 @@ def generate_display_info():
             st.session_state.messages.append(message)
 
             # Get all the ingredients needed and put them into a list
-            # ingredients_msg = generate_arctic_ingredients()
             ingredients_msg = generate_arctic_response(DEFAULT_INGREDIENTS_LIST_PROMPT, 0.1, 1, False)
-            print(list(ingredients_msg))
-            ingredients = "".join(list(ingredients_msg)).split("\n\n")[-1]  # This stops any overflow from previous responses
-            ingredients_list = ingredientregex.sub("", ingredients).strip(" ").split(", ")
+            ingredients_list = "".join(list(ingredients_msg))[1:].split(", ")
 
             # Make everything capitalized to stop issues and format nicer
-            ingredient_list = [i.capitalize() for i in ingredients_list]
+            ingredient_list = [i.split(" (")[0].capitalize() for i in ingredients_list]
 
             # Check if all the ingredients are actually valid
             ingredients_list = []
@@ -402,9 +396,6 @@ if prompt:
     with container:
         with st.chat_message("user", avatar=icons["user"]):
             st.write(prompt)
-
-# Regex for getting just ingredients
-ingredientregex = re.compile("[^a-zA-Z, \r\n]")       # https://stackoverflow.com/a/22521156
 
 # Generate a new response if last message is not from assistant
 if st.session_state.messages[-1]["role"] != "assistant":

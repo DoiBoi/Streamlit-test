@@ -3,7 +3,7 @@ import replicate        # For accessing AI model API
 import os               # For opening external text files
 from transformers import AutoTokenizer
 import re               # For cleaning AI responses
-from fpdf import FPDF   # For PDF generation
+from Recipe import Recipe
 
 # Set assistant icon to Snowflake logo
 icons = {"assistant": "./resources/chef-hat.svg", "user": "👨‍🍳"}
@@ -55,46 +55,6 @@ INGREDIENT_LIST = []
 with open("resources/ingredients_list.txt", mode="r") as file:
     lines = file.read().split("\n")
     INGREDIENT_LIST = [i.capitalize() for i in lines]
-
-class Recipe:
-    def __init__(self, name, ingredients, instructions, full_recipe):
-        self.name = name
-        self.ingredients = ingredients
-        instructions = instructions.split("\n1. ")[-1]
-        self.instructions = f'1. {instructions}'.split("\n")
-        self.full_recipe = full_recipe
-
-    #TODO: Add any tags that might be useful for filtering in the saved recipes page
-    def generate_tags(self):
-        self.num_of_ingredients = len(self.ingredients)
-        self.tags = []
-
-    def make_pdf(self):
-        # Make the components into strings
-        ingredients = "\n- ".join(self.ingredients)
-        ingredients = f"- {ingredients}"
-        instructions = "\n\n".join(self.instructions)
-
-        # Initialise PDF generator
-        pdf = FPDF(format="A4")
-        pdf.add_page()
-
-        # Title
-        pdf.set_font('Helvetica', size=24, style="BI")
-        pdf.multi_cell(text=self.name, w=210/2, padding=5, new_x="LEFT", new_y="NEXT")
-
-        # Main body
-        column_width = 190/2
-        pdf.set_font('Helvetica', size=18, style="B")
-        pdf.multi_cell(text="Ingredients", w=column_width, new_x="RIGHT", new_y="TOP", padding=3)
-        pdf.multi_cell(text="Method", w=column_width, new_x="LMARGIN", new_y="NEXT", padding=3)
-        pdf.set_font('Helvetica', size=11, style="")
-        pdf.multi_cell(w=column_width, h=5, new_x="RIGHT", new_y="TOP", text=ingredients)
-        pdf.multi_cell(w=column_width, h=5, new_x="LEFT", new_y="TOP", text=instructions)
-
-        # Output final PDF
-        pdf_output = bytes(pdf.output())
-        return pdf_output
 
 # App title
 st.set_page_config(page_title="Home - Chef Chat", page_icon="👨‍🍳")
@@ -213,7 +173,7 @@ def get_num_tokens(prompt):
 # Function for generating Snowflake Arctic responses
 # user_input is whether or not this response will depend on what the user has inputted (user_input = True)
 #                           or if it just depends on the previous response from the ai (user_input = False)
-def generate_arctic_response(given_prompt, temp, top, user_input):
+def generate_arctic_response(given_prompt: str, temp: float, top: float, user_input: bool):
     prompt = []
     prompt.append("<|im_start|>system\n" + given_prompt + "<|im_end|>\n")
     if user_input:
@@ -319,7 +279,7 @@ def generate_arctic_ingredients():
                                   }):
         yield str(event)
 
-def replace_ingredient(ingredient):
+def replace_ingredient(ingredient: str):
     # Make new input and remove old one
     prev_user_input = st.session_state.messages[-2]
 
@@ -379,6 +339,7 @@ def clear_recipes():
 # Generates the regular response and the ingredients list
 def generate_display_info():
     global INDEX
+
     with container:
         with st.chat_message("assistant", avatar=icons["assistant"]):
             # ingredients_response = generate_arctic_ingredients_response()
@@ -409,6 +370,7 @@ def generate_display_info():
             # Get all the ingredients needed and put them into a list
             # ingredients_msg = generate_arctic_ingredients()
             ingredients_msg = generate_arctic_response(DEFAULT_INGREDIENTS_LIST_PROMPT, 0.1, 1, False)
+            print(list(ingredients_msg))
             ingredients = "".join(list(ingredients_msg)).split("\n\n")[-1]  # This stops any overflow from previous responses
             ingredients_list = ingredientregex.sub("", ingredients).strip(" ").split(", ")
 

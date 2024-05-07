@@ -26,7 +26,7 @@ def reset_options():
 def delete_all_recipes():
     st.session_state.recipes = []
 
-def remove_recipe(name):
+def remove_recipe(name: str):
     for index, recipe in enumerate(st.session_state.recipes):
         if recipe.name == name:
             st.session_state.recipes.pop(index)

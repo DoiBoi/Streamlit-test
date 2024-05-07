@@ -245,7 +245,7 @@ def generate_arctic_response(given_prompt, temp, top, user_input):
 # Function for generating Snowflake Arctic response for ingredients
 def generate_arctic_ingredients_response():
     prompt = []
-    prompt.append("<|im_start|>system\n" + DEFAULT_INGREDIENTS_PROMPT[index] + "<|im_end|>\n")
+    prompt.append("<|im_start|>system\n" + DEFAULT_INGREDIENTS_PROMPT[INDEX] + "<|im_end|>\n")
     for dict_message in st.session_state.messages:
         if dict_message["role"] == "user":
             prompt.append("<|im_start|>user\n" + dict_message["content"] + "<|im_end|>")
@@ -272,7 +272,7 @@ def generate_arctic_ingredients_response():
 # Function for generating Snowflake Arctic response for method
 def generate_arctic_method_response():
     prompt = []
-    prompt.append("<|im_start|>system\n" + DEFAULT_METHOD_PROMPT[index] + "<|im_end|>\n")
+    prompt.append("<|im_start|>system\n" + DEFAULT_METHOD_PROMPT[INDEX] + "<|im_end|>\n")
     for dict_message in st.session_state.messages:
         if dict_message["role"] == "user" or dict_message == st.session_state.messages[-1]:
             prompt.append("<|im_start|>user\n" + dict_message["content"] + "<|im_end|>")

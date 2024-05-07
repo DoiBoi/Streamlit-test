@@ -107,8 +107,7 @@ with viewing_container:
                 with rcol1:
                     st.subheader("Ingredients")
                     for ingredient in recipe.ingredients:
-                        if ingredient in INGREDIENT_LIST:
-                            st.write(f"- {ingredient}")
+                        st.write(f"- {ingredient}")
 
                 # Method section
                 with rcol2:

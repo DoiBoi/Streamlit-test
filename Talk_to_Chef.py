@@ -36,15 +36,24 @@ MODE_LIST = ["Create recipe from ingredients", "Create recipe for dish"]
 ABOUT_MESSAGES = ['This chat bot is designed to give you recipe suggestions based on ingredients you have. To use it, simply write each of your ingredients separated by commas.',
                   'This chat bot is designed to give you a recipe based on the dish you provide. To use it, simply enter the name of your dish.']
 
-START_MESSAGES = ["Hi, I'm an language model trained to be your personal chef! Ask me about any recipe or anything food related.",
-                  "Right, let's get one thing straight - cooking isn't just about throwing ingredients together and hoping for the best. It's an art form, and I expect nothing but perfection from you. Now, let's get started!",
-                  "Welcome, my friend! Are you ready to take your taste buds on a wild ride? Let's dive into the world of flavor and create something that'll make your mouth water!",
-                  "Hello there! Let's cook up a storm together, using fresh ingredients and simple techniques to create a delicious meal that'll bring smiles to everyone's faces. Ready to get started?",
-                  "Hey buddy, my main man! Ready to have some fun in the kitchen? Let's make something so tasty, it'll make your taste buds dance like they've never danced before.",
-                  "Welcome to the burger joint, my friend! What can I get started for you today?"]
+START_MESSAGES = [["Hi, I'm an language model trained to be your personal chef! Give me some ingredients and I'll make a recipe or ask me anything food related!",
+                   "Hi, I'm an language model trained to be your personal chef! Give me the name of a dish and I'll make a recipe or ask me anything food related!"],
+                  ["Right, let's get one thing straight - cooking isn't just about throwing ingredients together and hoping for the best. It's an art form, and I expect nothing but perfection from you. Now, let's get started!",
+                  "Right, let's get one thing straight - cooking isn't just about throwing ingredients together and hoping for the best. It's an art form, and I expect nothing but perfection from you. Now, let's get started!"],
+                  ["Welcome, my friend! Are you ready to take your taste buds on a wild ride? Let's dive into the world of flavor and create something that'll make your mouth water!",
+                  "Welcome, my friend! Are you ready to take your taste buds on a wild ride? Let's dive into the world of flavor and create something that'll make your mouth water!"],
+                  ["Hello there! Let's cook up a storm together, using fresh ingredients and simple techniques to create a delicious meal that'll bring smiles to everyone's faces. Ready to get started?",
+                  "Hello there! Let's cook up a storm together, using fresh ingredients and simple techniques to create a delicious meal that'll bring smiles to everyone's faces. Ready to get started?"],
+                  ["Hey buddy, my main man! Ready to have some fun in the kitchen? Let's make something so tasty, it'll make your taste buds dance like they've never danced before.",
+                  "Hey buddy, my main man! Ready to have some fun in the kitchen? Let's make something so tasty, it'll make your taste buds dance like they've never danced before."],
+                  ["Welcome to the burger joint, my friend! What can I get started for you today?",
+                  "Welcome to the burger joint, my friend! What can I get started for you today?"]]
 
 EXAMPLES = ['Eggs, flour, milk, vanilla extract, baking soda, baking powder, butter, sugar, salt.',
             'Bolognese']
+
+CHAT_INPUT_HINTS = ["Enter your ingredients here",
+                    "Enter a dish name here"]
 
 # INDEX = 0
 
@@ -60,7 +69,7 @@ st.set_page_config(page_title="Home - Chef Chat", page_icon="👨‍🍳")
 
 def clear_chat_history():
     INDEX = CHEF_LIST.index(st.session_state.personality_index)
-    st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[INDEX]}]
+    st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[INDEX][mode_index]}]
 
 def reset_options():
     st.session_state.personality_option = 0
@@ -140,8 +149,8 @@ with st.sidebar:
 # Store LLM-generated responses
 INDEX = CHEF_LIST.index(st.session_state.personality_index)
 if "messages" not in st.session_state.keys():
-    st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[INDEX]}]
-st.session_state.messages[0]["content"] = START_MESSAGES[INDEX]
+    st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[INDEX][mode_index]}]
+st.session_state.messages[0]["content"] = START_MESSAGES[INDEX][mode_index]
 
 st.title("Talk to Chef 🍳")
 
@@ -339,12 +348,9 @@ def generate_display_info():
 
     with container:
         with st.chat_message("assistant", avatar=icons["assistant"]):
-            # ingredients_response = generate_arctic_ingredients_response()
             ingredients_response = generate_arctic_response(DEFAULT_INGREDIENTS_PROMPT[INDEX], temperature, top_p, True)
-            # method_response = generate_arctic_method_response()
             method_response = generate_arctic_response(DEFAULT_METHOD_PROMPT[INDEX], temperature, top_p, False)
 
-            # name_msg = generate_arctic_name()
             name_msg = generate_arctic_response(DEFAULT_NAME_PROMPT, 0.1, 1, False)
             name = "".join(list(name_msg)).split("\n\n")[-1]
 
@@ -390,7 +396,7 @@ def generate_display_info():
                         index += 1
 
 # User-provided prompt
-prompt = st.chat_input(disabled=not replicate_api, placeholder="Enter your ingredients here")
+prompt = st.chat_input(disabled=not replicate_api, placeholder=CHAT_INPUT_HINTS[mode_index])
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     with container:

@@ -53,12 +53,12 @@ with st.sidebar:
             "sort by": 0
             }
 
-    veg = st.checkbox("Non-vegetarian", value=st.session_state.filters["veg"])
-    dairy = st.checkbox("Dairy", value=st.session_state.filters["dairy"])
+    veg = st.checkbox("Non-vegetarian", value=st.session_state.filters["veg"], key="veg_filter")
+    dairy = st.checkbox("Dairy", value=st.session_state.filters["dairy"], key="dairy_filter")
     min_time, max_time = st.select_slider("Total preparation & cook time (minutes)",
                                           options=[i for i in range(0, 121, 5)],
-                                          value=[st.session_state.filters["min time"], st.session_state.filters["max time"]]
-                                          )
+                                          value=[st.session_state.filters["min time"], st.session_state.filters["max time"]],
+                                          key="time_filter")
 
     st.session_state.filters["veg"] = veg
     st.session_state.filters["dairy"] = dairy
@@ -66,17 +66,17 @@ with st.sidebar:
     st.session_state.filters["max time"] = max_time
 
     st.subheader("Sort by")
-    sort = st.radio("Sort by", options=SORT_OPTIONS, index=st.session_state.filters["sort by"], label_visibility="collapsed")
+    sort = st.radio("Sort by", options=SORT_OPTIONS, index=st.session_state.filters["sort by"], label_visibility="collapsed", key="sort_by")
 
     st.session_state.filters["sort by"] = SORT_OPTIONS.index(sort)
 
-    st.button("Reset filters", type="secondary", on_click=reset_options)
+    st.button("Reset filters", type="secondary", on_click=reset_options, use_container_width=True)
 
     col1, col2 = st.columns(2)
-    clear_all = col1.button("Clear all recipes", type="primary")
+    clear_all = col1.button("Clear all recipes", type="primary", use_container_width=True)
 
     if clear_all:
-        clear_all = col2.button("Confirm delete", type="secondary", on_click=delete_all_recipes)
+        confirm_clear_all = col2.button("Confirm delete", type="secondary", on_click=delete_all_recipes, use_container_width=True)
 
     st.divider()
 
@@ -117,12 +117,15 @@ with viewing_container:
 
                 pdf = recipe.make_pdf()
 
-                st.download_button("Download recipe as PDF",
+                rbcol1, rbcol2 = st.columns(2)
+                rbcol1.download_button("Download recipe as PDF",
                                    mime="application/pdf",
                                    data=pdf,
                                    key="".join(random.choice(string.ascii_lowercase) for i in range(128)),
-                                   file_name=f"{recipe.name} Recipe.pdf")
-                st.button("Delete recipe",
+                                   file_name=f"{recipe.name} Recipe.pdf",
+                                   use_container_width=True)
+                rbcol2.button("Delete recipe",
                           type="primary",
                           key="".join(random.choice(string.ascii_lowercase) for i in range(128)),
-                          on_click=lambda recipe=recipe: remove_recipe(recipe.name))
+                          on_click=lambda recipe=recipe: remove_recipe(recipe.name),
+                          use_container_width=True)

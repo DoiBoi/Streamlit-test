@@ -69,23 +69,21 @@ st.set_page_config(page_title="Home - Chef Chat", page_icon="👨‍🍳")
 
 def clear_chat_history():
     INDEX = CHEF_LIST.index(st.session_state.personality_index)
-    st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[INDEX][mode_index]}]
+    MODE_INDEX = MODE_LIST.index(st.session_state.mode_index)
+    st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[INDEX][MODE_INDEX]}]
 
 def reset_options():
     st.session_state.personality_option = 0
     st.session_state.mode_option = 0
 
-def set_mode(val):
-    print(val)
-    st.session_state.mode_option = val
-    clear_chat_history()
-def set_person(val):
-    print(val)
-    st.session_state.personality_option = val
+def set_mode_from_key():
+    MODE_INDEX = MODE_LIST.index(st.session_state.mode_index)
+    st.session_state.mode_option = MODE_INDEX
     clear_chat_history()
 def set_person_from_key():
     INDEX = CHEF_LIST.index(st.session_state.personality_index)
-    set_person(INDEX)
+    st.session_state.personality_option = INDEX
+    clear_chat_history()
 
 # Replicate Credentials
 with st.sidebar:
@@ -125,21 +123,27 @@ with st.sidebar:
     # Mode selection
     if "mode_option" not in st.session_state.keys():
         st.session_state.mode_option = 0
-    mode = st.radio("Select a mode", MODE_LIST, index=st.session_state.mode_option)
-    mode_index = MODE_LIST.index(mode)
-    if st.session_state.mode_option != mode_index:
-        st.session_state.mode_option = mode_index
+
+    mode = st.radio("Select a mode", MODE_LIST, index=st.session_state.mode_option, on_change=set_mode_from_key, key="mode_index")
+    # mode_index = MODE_LIST.index(mode)
+    # if st.session_state.mode_option != mode_index:
+    #     st.session_state.mode_option = mode_index
+
+    # col1, col2 = st.columns(2)
+    st.button("Reset options", on_click=reset_options, type="secondary", use_container_width=True)
 
     col1, col2 = st.columns(2)
-    col1.button("Reset options", on_click=reset_options, type="secondary")
-    col2.button('Clear chat', on_click=clear_chat_history, type="primary")
+    clear_chat = col1.button("Clear chat", type="primary", use_container_width=True)
+
+    if clear_chat:
+        confirm_clear_chat = col2.button('Confirm clear', on_click=clear_chat_history, type="secondary", use_container_width=True)
 
     st.divider()
 
     st.header("About")
-    st.markdown(ABOUT_MESSAGES[mode_index])
+    st.markdown(ABOUT_MESSAGES[st.session_state.mode_option])
     st.markdown("Here's an example message:")
-    st.markdown(f"*{EXAMPLES[mode_index]}*")
+    st.markdown(f"*{EXAMPLES[st.session_state.mode_option]}*")
 
     st.divider()
 
@@ -148,9 +152,11 @@ with st.sidebar:
 
 # Store LLM-generated responses
 INDEX = CHEF_LIST.index(st.session_state.personality_index)
+MODE_INDEX = st.session_state.mode_option
+
 if "messages" not in st.session_state.keys():
-    st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[INDEX][mode_index]}]
-st.session_state.messages[0]["content"] = START_MESSAGES[INDEX][mode_index]
+    st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[INDEX][MODE_INDEX]}]
+st.session_state.messages[0]["content"] = START_MESSAGES[INDEX][MODE_INDEX]
 
 st.title("Talk to Chef 🍳")
 
@@ -385,7 +391,7 @@ def generate_display_info():
 
             st.button("Save recipe", type="secondary", key="save", on_click=lambda recipe=Recipe(name, ingredients_list, method_response, full_response): save_recipe(recipe))
 
-            if mode_index == 1:
+            if MODE_INDEX == 1:
                 # Show the replace ingredients list
                 num_cols = 3
                 with st.expander("Replace ingredient:"):
@@ -396,7 +402,7 @@ def generate_display_info():
                         index += 1
 
 # User-provided prompt
-prompt = st.chat_input(disabled=not replicate_api, placeholder=CHAT_INPUT_HINTS[mode_index])
+prompt = st.chat_input(disabled=not replicate_api, placeholder=CHAT_INPUT_HINTS[MODE_INDEX])
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     with container:

@@ -101,7 +101,7 @@ with st.sidebar:
 
 
     # DESIGN ELEMENTS
-    st.title('CHEF CHAT :cook:')
+    st.title('CHEF CHAT 👨‍🍳')
 
     # Navigation area
     st.header("Navigation")
@@ -125,11 +125,7 @@ with st.sidebar:
         st.session_state.mode_option = 0
 
     mode = st.radio("Select a mode", MODE_LIST, index=st.session_state.mode_option, on_change=set_mode_from_key, key="mode_index")
-    # mode_index = MODE_LIST.index(mode)
-    # if st.session_state.mode_option != mode_index:
-    #     st.session_state.mode_option = mode_index
 
-    # col1, col2 = st.columns(2)
     st.button("Reset options", on_click=reset_options, type="secondary", use_container_width=True)
 
     col1, col2 = st.columns(2)
@@ -216,83 +212,6 @@ def generate_arctic_response(given_prompt: str, temp: float, top: float, user_in
                                   }):
         yield str(event)
 
-# Function for generating Snowflake Arctic response for ingredients
-def generate_arctic_ingredients_response():
-    prompt = []
-    prompt.append("<|im_start|>system\n" + DEFAULT_INGREDIENTS_PROMPT[INDEX] + "<|im_end|>\n")
-    for dict_message in st.session_state.messages:
-        if dict_message["role"] == "user":
-            prompt.append("<|im_start|>user\n" + dict_message["content"] + "<|im_end|>")
-        else:
-            prompt.append("<|im_start|>assistant\n" + dict_message["content"] + "<|im_end|>")
-
-    prompt.append("<|im_start|>assistant")
-    prompt.append("")
-    prompt_str = "\n".join(prompt)
-
-    if get_num_tokens(prompt_str) >= 3072:
-        st.error("Conversation length too long. Please keep it under 3072 tokens.")
-        st.button('Clear chat', on_click=clear_chat_history, key="clear_chat_history", type="primary")
-        st.stop()
-
-    for event in replicate.stream("snowflake/snowflake-arctic-instruct",
-                           input={"prompt": prompt_str,
-                                  "prompt_template": r"{prompt}",
-                                  "temperature": temperature,
-                                  "top_p": top_p,
-                                  }):
-        yield str(event)
-
-# Function for generating Snowflake Arctic response for method
-def generate_arctic_method_response():
-    prompt = []
-    prompt.append("<|im_start|>system\n" + DEFAULT_METHOD_PROMPT[INDEX] + "<|im_end|>\n")
-    for dict_message in st.session_state.messages:
-        if dict_message["role"] == "user" or dict_message == st.session_state.messages[-1]:
-            prompt.append("<|im_start|>user\n" + dict_message["content"] + "<|im_end|>")
-        else:
-            prompt.append("<|im_start|>assistant\n" + dict_message["content"] + "<|im_end|>")
-
-    prompt.append("<|im_start|>assistant")
-    prompt.append("")
-    prompt_str = "\n".join(prompt)
-
-    if get_num_tokens(prompt_str) >= 3072:
-        st.error("Conversation length too long. Please keep it under 3072 tokens.")
-        st.button('Clear chat', on_click=clear_chat_history, key="clear_chat_history", type="primary")
-        st.stop()
-
-    for event in replicate.stream("snowflake/snowflake-arctic-instruct",
-                           input={"prompt": prompt_str,
-                                  "prompt_template": r"{prompt}",
-                                  "temperature": temperature,
-                                  "top_p": top_p,
-                                  }):
-        yield str(event)
-
-# Function for generating Snowflake Arctic ingredients list
-def generate_arctic_ingredients():
-    prompt = []
-    prompt.append("<|im_start|>system\nThe user will give you a recipe, please return all the ingredients listed in the message as a COMMA SEPARATED SENTENCE without any measurements. It doesn't matter whether the recipe is complete or not, just try to find as many as possible.<|im_end|>\n")
-    prompt.append("<|im_start|>user\n" + st.session_state.messages[-1]["content"] + "<|im_end|>")
-
-    prompt.append("<|im_start|>assistant")
-    prompt.append("")
-    prompt_str = "\n".join(prompt)
-
-    if get_num_tokens(prompt_str) >= 3072:
-        st.error("Conversation length too long. Please keep it under 3072 tokens.")
-        st.button('Clear chat', on_click=clear_chat_history, key="clear_chat_history", type="primary")
-        st.stop()
-
-    for event in replicate.stream("snowflake/snowflake-arctic-instruct",
-                           input={"prompt": prompt_str,
-                                  "prompt_template": r"{prompt}",
-                                  "temperature": 0.1,
-                                  "top_p": 1,
-                                  }):
-        yield str(event)
-
 def replace_ingredient(ingredient: str):
     # Make new input and remove old one
     prev_user_input = st.session_state.messages[-2]
@@ -312,32 +231,9 @@ def replace_ingredient(ingredient: str):
     # Generate new response
     generate_display_info()
 
-# Function for generating Snowflake Arctic name
-def generate_arctic_name():
-    prompt = []
-    prompt.append("<|im_start|>system\nThe user will give you a recipe with instructions, please return a fitting name for this recipe, and ensure that your response ONLY includes this name, and nothing else. It doesn't matter whether the recipe is complete or not, just try to create a name.<|im_end|>\n")
-    prompt.append("<|im_start|>user\n" + st.session_state.messages[-1]["content"] + "<|im_end|>")
-
-    prompt.append("<|im_start|>assistant")
-    prompt.append("")
-    prompt_str = "\n".join(prompt)
-
-    if get_num_tokens(prompt_str) >= 3072:
-        st.error("Conversation length too long. Please keep it under 3072 tokens.")
-        st.button('Clear chat', on_click=clear_chat_history, key="clear_chat_history", type="primary")
-        st.stop()
-
-    for event in replicate.stream("snowflake/snowflake-arctic-instruct",
-                           input={"prompt": prompt_str,
-                                  "prompt_template": r"{prompt}",
-                                  "temperature": 0.1,
-                                  "top_p": 1,
-                                  }):
-        yield str(event)
-
 # saves given recipe into session state
-# recipe parameter: recipe object (defined near the top of the file)
-def save_recipe(recipe):
+# recipe parameter: recipe object (defined in the Recipe.py file)
+def save_recipe(recipe: Recipe):
     if "recipes" not in st.session_state:
         st.session_state.recipes = []
 

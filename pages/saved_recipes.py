@@ -93,14 +93,22 @@ with open("resources/ingredients_list.txt", mode="r") as file:
 # create container for saved recipe viewer section
 viewing_container = st.container()
 with viewing_container:
-    if "recipes" not in st.session_state:
-        st.write("There's nothing to show here! Save a recipe to see it here.")
-    elif st.session_state.recipes == []:
+    if ("recipes" not in st.session_state) or (st.session_state.recipes == []):
         st.write("There's nothing to show here! Save a recipe to see it here.")
     else:
         for recipe in st.session_state.recipes:
             with st.expander(recipe.name):
                 st.header(recipe.name)
+                st.subheader("Tags")
+
+                num_cols = 3
+                tcols = [i for i in st.columns(num_cols)]
+                index = 0
+                for tag in recipe.tags:
+                    if tag.capitalize() not in INGREDIENT_LIST:
+                        tcols[index%num_cols].button(tag, use_container_width=True, type="secondary", key="".join(random.choice(string.ascii_lowercase) for i in range(128)))
+                        index += 1
+
                 rcol1, rcol2 = st.columns(2)
 
                 # Ingredients section

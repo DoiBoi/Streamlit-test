@@ -11,11 +11,12 @@ class Recipe:
         self.ingredients = ingredients
         self._clean_instructions(instructions)
         self.full_recipe = full_recipe
+        self.num_of_ingredients = len(self.ingredients)
 
         self.generate_tags()
 
     def generate_tags(self) -> None:
-        self.num_of_ingredients = len(self.ingredients)
+        # self.num_of_ingredients = len(self.ingredients) # moved to __init__ 
         self.total_time = 0
         tags = list(self._generate_arctic_response())
         print(tags)

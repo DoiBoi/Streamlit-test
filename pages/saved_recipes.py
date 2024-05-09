@@ -89,6 +89,54 @@ with open("resources/ingredients_list.txt", mode="r") as file:
     lines = file.read().split("\n")
     INGREDIENT_LIST = [i.capitalize() for i in lines]
 
+# adapted from https://www.geeksforgeeks.org/quick-sort/
+# Function to find the partition position
+def partition(array, low, high):
+
+    # Choose the rightmost element as pivot
+    pivot = array[high]
+
+    # Pointer for greater element
+    i = low - 1
+
+    # Traverse through all elements
+    # compare each element with pivot
+    for j in range(low, high):
+        if array[j].num_of_ingredients <= pivot.num_of_ingredients:
+
+            # If element smaller than pivot is found
+            # swap it with the greater element pointed by i
+            i = i + 1
+
+            # Swapping element at i with element at j
+            (array[i], array[j]) = (array[j], array[i])
+
+    # Swap the pivot element with
+    # the greater element specified by i
+    (array[i + 1], array[high]) = (array[high], array[i + 1])
+
+    # Return the position from where partition is done
+    return i + 1
+
+# adapted from https://www.geeksforgeeks.org/quick-sort/
+# Function to perform quicksort
+def quicksort(array, low, high):
+    if low < high:
+
+        # Find pivot element such that
+        # element smaller than pivot are on the left
+        # element greater than pivot are on the right
+        pi = partition(array, low, high)
+
+        # Recursive call on the left of pivot
+        quicksort(array, low, pi - 1)
+
+        # Recursive call on the right of pivot
+        quicksort(array, pi + 1, high)
+
+# use quicksort to sort recipe list by number of ingredients
+def sort_by_ingredients():
+    quicksort(st.session_state.recipes, 0, len(st.session_state.recipes))
 
 # create container for saved recipe viewer section
 viewing_container = st.container()
@@ -96,6 +144,8 @@ with viewing_container:
     if ("recipes" not in st.session_state) or (st.session_state.recipes == []):
         st.write("There's nothing to show here! Save a recipe to see it here.")
     else:
+        if sort == "Number of ingredients":
+            sort_by_ingredients()
         for recipe in st.session_state.recipes:
             with st.expander(recipe.name):
                 st.header(recipe.name)

@@ -136,7 +136,7 @@ def quicksort(array, low, high):
 
 # use quicksort to sort recipe list by number of ingredients
 def sort_by_ingredients():
-    quicksort(st.session_state.recipes, 0, len(st.session_state.recipes))
+    quicksort(st.session_state.recipes, 0, len(st.session_state.recipes) - 1)
 
 # create container for saved recipe viewer section
 viewing_container = st.container()

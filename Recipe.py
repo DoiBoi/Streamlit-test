@@ -28,10 +28,12 @@ class Recipe:
     def _clean_instructions(self, instructions: str) -> None:
         instructions = instructions.split("\n1. ")[-1].split("\n")
         self.instructions = []
+        step_no = 0
         # Fix issue with numbering not correctly showing up
-        for index, step in enumerate(instructions):
+        for step in instructions:
             if step != "":
-                self.instructions.append(f'{index+1}. {step.split(f"{index+1}. ")[-1]}')
+                self.instructions.append(f'{step_no+1}. {step.split(f"{step_no+1}. ")[-1]}')
+                step_no += 1
 
     def make_pdf(self) -> bytes:
         # Make the components into strings

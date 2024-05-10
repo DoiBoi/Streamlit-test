@@ -1,9 +1,9 @@
-import string
-import streamlit as st
-import replicate
-import os
+import os               # For opening external text files
+import random           # For widget key generation
+import replicate        # For accessing AI model API
+import string           # For widget key generation
+import streamlit as st  # For website generation
 from transformers import AutoTokenizer
-import random
 
 st.set_page_config(
     page_title="Saved Recipes - Chef Chat",
@@ -24,7 +24,8 @@ def reset_options():
         }
 
 def delete_all_recipes():
-    st.session_state.recipes = []
+    if "recipes" in st.session_state:
+        st.session_state.recipes = []
 
 def remove_recipe(name: str):
     for index, recipe in enumerate(st.session_state.recipes):

@@ -16,10 +16,8 @@ class Recipe:
         self.generate_tags()
 
     def generate_tags(self) -> None:
-        # self.num_of_ingredients = len(self.ingredients) # moved to __init__ 
         self.total_time = 0
-        tags = list(self._generate_arctic_response())
-        print(tags)
+        tags = self._generate_arctic_response()
         self.tags = "".join(tags)[1:].split("\n\n")[-1].split(", ")
         if "," in self.tags:
             self.tags = self.tags[-1].split(",")
@@ -72,10 +70,13 @@ class Recipe:
         prompt.append("")
         prompt_str = "\n".join(prompt)
 
+        response = []
         for event in replicate.stream("snowflake/snowflake-arctic-instruct",
                             input={"prompt": prompt_str,
                                     "prompt_template": r"{prompt}",
                                     "temperature": 0.1,
                                     "top_p": 1,
                                     }):
-            yield str(event)
+            response.append(str(event))
+
+        return response

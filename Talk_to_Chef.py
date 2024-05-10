@@ -1,7 +1,10 @@
-import streamlit as st  # For website generation
-import replicate        # For accessing AI model API
 import os               # For opening external text files
+import random           # For widget key generation
+import replicate        # For accessing AI model API
+import string           # For widget key generation
+import streamlit as st  # For website generation
 from transformers import AutoTokenizer
+
 from Recipe import Recipe
 
 # Set assistant icon to Snowflake logo
@@ -23,7 +26,7 @@ DEFAULT_METHOD_PROMPT = ["You are a helpful chef. Only provide the instructions 
 
 DEFAULT_INGREDIENTS_LIST_PROMPT = "The user will give you a recipe, please return all the ingredients listed in the message as a COMMA SEPARATED SENTENCE without any measurements. It doesn't matter whether the recipe is complete or not, just try to find as many as possible."
 
-DEFAULT_NAME_PROMPT = "The user will give you a recipe with instructions, please return a fitting name for this recipe, and ensure that your response ONLY includes this name, and nothing else. It doesn't matter whether the recipe is complete or not, just try to create a name."
+DEFAULT_NAME_PROMPT = "The user will give you a recipe with instructions, please return a fitting name for this recipe, and ensure that your response ONLY includes this name, and nothing else. It doesn't matter whether the recipe is complete or not, just try to create a name. If the name is already good enough, return the same name."
 
 CHEF_LIST = ["Default","Gordon Ramsay", "Guy Fieri", "Jamie Oliver", "Uncle Roger", "Burger Guy"]
 
@@ -112,7 +115,7 @@ with st.sidebar:
     st.header("Options")
 
     temperature = 3     # This is the "creativity" of the response (higher is more creative, less is predictable)
-    top_p = 0.1         # This is the next token's probability threshold (lower makes more sense)
+    top_p = 0.1         # This is the next token's probability threshold (lower makes more "lexical" sense)
 
     # Chef personality selector
     if "personality_option" not in st.session_state.keys():
@@ -204,13 +207,16 @@ def generate_arctic_response(given_prompt: str, temp: float, top: float, user_in
         st.button('Clear chat', on_click=clear_chat_history, key="clear_chat_history", type="primary")
         st.stop()
 
+    response = []
     for event in replicate.stream("snowflake/snowflake-arctic-instruct",
                            input={"prompt": prompt_str,
                                   "prompt_template": r"{prompt}",
                                   "temperature": temp,
                                   "top_p": top,
                                   }):
-        yield str(event)
+        response.append(str(event))
+
+    return response
 
 def replace_ingredient(ingredient: str):
     # Make new input and remove old one
@@ -239,34 +245,55 @@ def save_recipe(recipe: Recipe):
 
     st.session_state.recipes.append(recipe)
 
-# clears all saved recipes, if any are saved
-def clear_recipes():
-    if "recipes" in st.session_state:
-        st.session_state.recipes = []
-
 # Generates the regular response and the ingredients list
 def generate_display_info():
     global INDEX
 
     with container:
         with st.chat_message("assistant", avatar=icons["assistant"]):
+            # Ingredient generation
             ingredients_response = generate_arctic_response(DEFAULT_INGREDIENTS_PROMPT[INDEX], temperature, top_p, True)
+            ingredients_response = "".join(ingredients_response)
+
+            if ":\n" in ingredients_response:   # If it has the ":", then it's not meant to be part of it
+                ingredients_response = "\n".join(ingredients_response.split(":\n")[1:])
+            elif "ngredients" in ingredients_response:
+                ingredients_response = "\n".join(ingredients_response.split("ngredients")[1:])
+            elif "\n\n" in ingredients_response:    # The double newline would mean it has an intro section
+                ingredients_response = "".join(ingredients_response.split("\n\n")[1:])
+            elif "\n-" in ingredients_response:
+                ingredients_response = "\n-".join(ingredients_response.split("\n-")[1:])
+                ingredients_response = f"-{ingredients_response}"
+
+            if "ethod" in ingredients_response: # If it has the method in the ingredients section
+                ingredients_response = ingredients_response.split("ethod")[0]
+
+            # Method generation
             method_response = generate_arctic_response(DEFAULT_METHOD_PROMPT[INDEX], temperature, top_p, False)
+            method_response = "".join(method_response)
 
-            name_msg = generate_arctic_response(DEFAULT_NAME_PROMPT, 0.1, 1, False)
-            name = "".join(list(name_msg)).split("\n\n")[-1]
+            if "Method:" in method_response:    # This also gets rid of the ingredients if it's there
+                method_response = method_response.split("Method:\n")[-1]
+            else:   # If there's an intro section instead of just the title
+                method_response = "".join(method_response.split("1. ")[1:])
+                method_response = f"1. {method_response}"
 
+            # Recipe name generation
+            name_reponse = generate_arctic_response(DEFAULT_NAME_PROMPT, 0.1, 1, False)
+            name = "".join(list(name_reponse)).split("\n\n")[-1]
+
+            # Display recipe
             st.header(name)
 
             icol, mcol = st.columns(2)
             with icol:
                 st.subheader("Ingredients")
-                ingredients_response = st.write_stream(ingredients_response)
+                st.write(ingredients_response)
             with mcol:
                 st.subheader("Method")
-                method_response = st.write_stream(method_response)
+                st.write(method_response)
 
-            full_response = "Ingredients:\n" + ingredients_response + "\n\nMethod:\n" + method_response
+            full_response = name + "\n\nIngredients:\n\n" + str(ingredients_response) + "\n\nMethod:\n\n" + str(method_response)
 
             # Add to history
             message = {"role": "assistant", "content": full_response}
@@ -294,7 +321,7 @@ def generate_display_info():
                     icols = [i for i in st.columns(num_cols)]
                     index = 0
                     for ingredient in ingredients_list:
-                        icols[index%num_cols].button(ingredient, type="secondary", key=ingredient, on_click=lambda ingredient=ingredient: replace_ingredient(ingredient))
+                        icols[index%num_cols].button(ingredient, type="secondary", key="".join(random.choice(string.ascii_lowercase) for i in range(128)), on_click=lambda ingredient=ingredient: replace_ingredient(ingredient))
                         index += 1
 
 # User-provided prompt

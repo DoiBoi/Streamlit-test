@@ -12,7 +12,9 @@ st.set_page_config(
 
 st.title("Saved Recipes 📃")
 
-SORT_OPTIONS = ["Number of ingredients", "Preparation time"]
+SORT_OPTIONS = ["Alphabetical",
+                "Number of ingredients",
+                "Preparation time"]
 
 def reset_options():
     st.session_state.filters = {

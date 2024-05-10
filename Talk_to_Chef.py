@@ -2,8 +2,7 @@ import streamlit as st  # For website generation
 import replicate        # For accessing AI model API
 import os               # For opening external text files
 from transformers import AutoTokenizer
-import re               # For cleaning AI responses
-from fpdf import FPDF   # For PDF generation
+from Recipe import Recipe
 
 # Set assistant icon to Snowflake logo
 icons = {"assistant": "./resources/chef-hat.svg", "user": "👨‍🍳"}
@@ -37,15 +36,24 @@ MODE_LIST = ["Create recipe from ingredients", "Create recipe for dish"]
 ABOUT_MESSAGES = ['This chat bot is designed to give you recipe suggestions based on ingredients you have. To use it, simply write each of your ingredients separated by commas.',
                   'This chat bot is designed to give you a recipe based on the dish you provide. To use it, simply enter the name of your dish.']
 
-START_MESSAGES = ["Hi, I'm an language model trained to be your personal chef! Ask me about any recipe or anything food related.",
-                  "Right, let's get one thing straight - cooking isn't just about throwing ingredients together and hoping for the best. It's an art form, and I expect nothing but perfection from you. Now, let's get started!",
-                  "Welcome, my friend! Are you ready to take your taste buds on a wild ride? Let's dive into the world of flavor and create something that'll make your mouth water!",
-                  "Hello there! Let's cook up a storm together, using fresh ingredients and simple techniques to create a delicious meal that'll bring smiles to everyone's faces. Ready to get started?",
-                  "Hey buddy, my main man! Ready to have some fun in the kitchen? Let's make something so tasty, it'll make your taste buds dance like they've never danced before.",
-                  "Welcome to the burger joint, my friend! What can I get started for you today?"]
+START_MESSAGES = [["Hi, I'm an language model trained to be your personal chef! Give me some ingredients and I'll make a recipe or ask me anything food related!",
+                   "Hi, I'm an language model trained to be your personal chef! Give me the name of a dish and I'll make a recipe or ask me anything food related!"],
+                  ["Right, let's get one thing straight - cooking isn't just about throwing ingredients together and hoping for the best. It's an art form, and I expect nothing but perfection from you. Now, let's get started!",
+                  "Right, let's get one thing straight - cooking isn't just about throwing ingredients together and hoping for the best. It's an art form, and I expect nothing but perfection from you. Now, let's get started!"],
+                  ["Welcome, my friend! Are you ready to take your taste buds on a wild ride? Let's dive into the world of flavor and create something that'll make your mouth water!",
+                  "Welcome, my friend! Are you ready to take your taste buds on a wild ride? Let's dive into the world of flavor and create something that'll make your mouth water!"],
+                  ["Hello there! Let's cook up a storm together, using fresh ingredients and simple techniques to create a delicious meal that'll bring smiles to everyone's faces. Ready to get started?",
+                  "Hello there! Let's cook up a storm together, using fresh ingredients and simple techniques to create a delicious meal that'll bring smiles to everyone's faces. Ready to get started?"],
+                  ["Hey buddy, my main man! Ready to have some fun in the kitchen? Let's make something so tasty, it'll make your taste buds dance like they've never danced before.",
+                  "Hey buddy, my main man! Ready to have some fun in the kitchen? Let's make something so tasty, it'll make your taste buds dance like they've never danced before."],
+                  ["Welcome to the burger joint, my friend! What can I get started for you today?",
+                  "Welcome to the burger joint, my friend! What can I get started for you today?"]]
 
 EXAMPLES = ['Eggs, flour, milk, vanilla extract, baking soda, baking powder, butter, sugar, salt.',
             'Bolognese']
+
+CHAT_INPUT_HINTS = ["Enter your ingredients here",
+                    "Enter a dish name here"]
 
 # INDEX = 0
 
@@ -56,68 +64,26 @@ with open("resources/ingredients_list.txt", mode="r") as file:
     lines = file.read().split("\n")
     INGREDIENT_LIST = [i.capitalize() for i in lines]
 
-class Recipe:
-    def __init__(self, name, ingredients, instructions, full_recipe):
-        self.name = name
-        self.ingredients = ingredients
-        instructions = instructions.split("\n1. ")[-1]
-        self.instructions = f'1. {instructions}'.split("\n")
-        self.full_recipe = full_recipe
-
-    #TODO: Add any tags that might be useful for filtering in the saved recipes page
-    def generate_tags(self):
-        self.num_of_ingredients = len(self.ingredients)
-        self.tags = []
-
-    def make_pdf(self):
-        # Make the components into strings
-        ingredients = "\n- ".join(self.ingredients)
-        ingredients = f"- {ingredients}"
-        instructions = "\n\n".join(self.instructions)
-
-        # Initialise PDF generator
-        pdf = FPDF(format="A4")
-        pdf.add_page()
-
-        # Title
-        pdf.set_font('Helvetica', size=24, style="BI")
-        pdf.multi_cell(text=self.name, w=210/2, padding=5, new_x="LEFT", new_y="NEXT")
-
-        # Main body
-        column_width = 190/2
-        pdf.set_font('Helvetica', size=18, style="B")
-        pdf.multi_cell(text="Ingredients", w=column_width, new_x="RIGHT", new_y="TOP", padding=3)
-        pdf.multi_cell(text="Method", w=column_width, new_x="LMARGIN", new_y="NEXT", padding=3)
-        pdf.set_font('Helvetica', size=11, style="")
-        pdf.multi_cell(w=column_width, h=5, new_x="RIGHT", new_y="TOP", text=ingredients)
-        pdf.multi_cell(w=column_width, h=5, new_x="LEFT", new_y="TOP", text=instructions)
-
-        # Output final PDF
-        pdf_output = bytes(pdf.output())
-        return pdf_output
-
 # App title
 st.set_page_config(page_title="Home - Chef Chat", page_icon="👨‍🍳")
 
 def clear_chat_history():
     INDEX = CHEF_LIST.index(st.session_state.personality_index)
-    st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[INDEX]}]
+    MODE_INDEX = MODE_LIST.index(st.session_state.mode_index)
+    st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[INDEX][MODE_INDEX]}]
 
 def reset_options():
     st.session_state.personality_option = 0
     st.session_state.mode_option = 0
 
-def set_mode(val):
-    print(val)
-    st.session_state.mode_option = val
-    clear_chat_history()
-def set_person(val):
-    print(val)
-    st.session_state.personality_option = val
+def set_mode_from_key():
+    MODE_INDEX = MODE_LIST.index(st.session_state.mode_index)
+    st.session_state.mode_option = MODE_INDEX
     clear_chat_history()
 def set_person_from_key():
     INDEX = CHEF_LIST.index(st.session_state.personality_index)
-    set_person(INDEX)
+    st.session_state.personality_option = INDEX
+    clear_chat_history()
 
 # Replicate Credentials
 with st.sidebar:
@@ -135,7 +101,7 @@ with st.sidebar:
 
 
     # DESIGN ELEMENTS
-    st.title('CHEF CHAT :cook:')
+    st.title('CHEF CHAT 👨‍🍳')
 
     # Navigation area
     st.header("Navigation")
@@ -157,21 +123,23 @@ with st.sidebar:
     # Mode selection
     if "mode_option" not in st.session_state.keys():
         st.session_state.mode_option = 0
-    mode = st.radio("Select a mode", MODE_LIST, index=st.session_state.mode_option)
-    mode_index = MODE_LIST.index(mode)
-    if st.session_state.mode_option != mode_index:
-        st.session_state.mode_option = mode_index
+
+    mode = st.radio("Select a mode", MODE_LIST, index=st.session_state.mode_option, on_change=set_mode_from_key, key="mode_index")
+
+    st.button("Reset options", on_click=reset_options, type="secondary", use_container_width=True)
 
     col1, col2 = st.columns(2)
-    col1.button("Reset options", on_click=reset_options, type="secondary")
-    col2.button('Clear chat', on_click=clear_chat_history, type="primary")
+    clear_chat = col1.button("Clear chat", type="primary", use_container_width=True)
+
+    if clear_chat:
+        confirm_clear_chat = col2.button('Confirm clear', on_click=clear_chat_history, type="secondary", use_container_width=True)
 
     st.divider()
 
     st.header("About")
-    st.markdown(ABOUT_MESSAGES[mode_index])
+    st.markdown(ABOUT_MESSAGES[st.session_state.mode_option])
     st.markdown("Here's an example message:")
-    st.markdown(f"*{EXAMPLES[mode_index]}*")
+    st.markdown(f"*{EXAMPLES[st.session_state.mode_option]}*")
 
     st.divider()
 
@@ -180,9 +148,11 @@ with st.sidebar:
 
 # Store LLM-generated responses
 INDEX = CHEF_LIST.index(st.session_state.personality_index)
+MODE_INDEX = st.session_state.mode_option
+
 if "messages" not in st.session_state.keys():
-    st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[INDEX]}]
-st.session_state.messages[0]["content"] = START_MESSAGES[INDEX]
+    st.session_state.messages = [{"role": "assistant", "content": START_MESSAGES[INDEX][MODE_INDEX]}]
+st.session_state.messages[0]["content"] = START_MESSAGES[INDEX][MODE_INDEX]
 
 st.title("Talk to Chef 🍳")
 
@@ -213,7 +183,7 @@ def get_num_tokens(prompt):
 # Function for generating Snowflake Arctic responses
 # user_input is whether or not this response will depend on what the user has inputted (user_input = True)
 #                           or if it just depends on the previous response from the ai (user_input = False)
-def generate_arctic_response(given_prompt, temp, top, user_input):
+def generate_arctic_response(given_prompt: str, temp: float, top: float, user_input: bool):
     prompt = []
     prompt.append("<|im_start|>system\n" + given_prompt + "<|im_end|>\n")
     if user_input:
@@ -242,84 +212,7 @@ def generate_arctic_response(given_prompt, temp, top, user_input):
                                   }):
         yield str(event)
 
-# Function for generating Snowflake Arctic response for ingredients
-def generate_arctic_ingredients_response():
-    prompt = []
-    prompt.append("<|im_start|>system\n" + DEFAULT_INGREDIENTS_PROMPT[INDEX] + "<|im_end|>\n")
-    for dict_message in st.session_state.messages:
-        if dict_message["role"] == "user":
-            prompt.append("<|im_start|>user\n" + dict_message["content"] + "<|im_end|>")
-        else:
-            prompt.append("<|im_start|>assistant\n" + dict_message["content"] + "<|im_end|>")
-
-    prompt.append("<|im_start|>assistant")
-    prompt.append("")
-    prompt_str = "\n".join(prompt)
-
-    if get_num_tokens(prompt_str) >= 3072:
-        st.error("Conversation length too long. Please keep it under 3072 tokens.")
-        st.button('Clear chat', on_click=clear_chat_history, key="clear_chat_history", type="primary")
-        st.stop()
-
-    for event in replicate.stream("snowflake/snowflake-arctic-instruct",
-                           input={"prompt": prompt_str,
-                                  "prompt_template": r"{prompt}",
-                                  "temperature": temperature,
-                                  "top_p": top_p,
-                                  }):
-        yield str(event)
-
-# Function for generating Snowflake Arctic response for method
-def generate_arctic_method_response():
-    prompt = []
-    prompt.append("<|im_start|>system\n" + DEFAULT_METHOD_PROMPT[INDEX] + "<|im_end|>\n")
-    for dict_message in st.session_state.messages:
-        if dict_message["role"] == "user" or dict_message == st.session_state.messages[-1]:
-            prompt.append("<|im_start|>user\n" + dict_message["content"] + "<|im_end|>")
-        else:
-            prompt.append("<|im_start|>assistant\n" + dict_message["content"] + "<|im_end|>")
-
-    prompt.append("<|im_start|>assistant")
-    prompt.append("")
-    prompt_str = "\n".join(prompt)
-
-    if get_num_tokens(prompt_str) >= 3072:
-        st.error("Conversation length too long. Please keep it under 3072 tokens.")
-        st.button('Clear chat', on_click=clear_chat_history, key="clear_chat_history", type="primary")
-        st.stop()
-
-    for event in replicate.stream("snowflake/snowflake-arctic-instruct",
-                           input={"prompt": prompt_str,
-                                  "prompt_template": r"{prompt}",
-                                  "temperature": temperature,
-                                  "top_p": top_p,
-                                  }):
-        yield str(event)
-
-# Function for generating Snowflake Arctic ingredients list
-def generate_arctic_ingredients():
-    prompt = []
-    prompt.append("<|im_start|>system\nThe user will give you a recipe, please return all the ingredients listed in the message as a COMMA SEPARATED SENTENCE without any measurements. It doesn't matter whether the recipe is complete or not, just try to find as many as possible.<|im_end|>\n")
-    prompt.append("<|im_start|>user\n" + st.session_state.messages[-1]["content"] + "<|im_end|>")
-
-    prompt.append("<|im_start|>assistant")
-    prompt.append("")
-    prompt_str = "\n".join(prompt)
-
-    if get_num_tokens(prompt_str) >= 3072:
-        st.error("Conversation length too long. Please keep it under 3072 tokens.")
-        st.button('Clear chat', on_click=clear_chat_history, key="clear_chat_history", type="primary")
-        st.stop()
-
-    for event in replicate.stream("snowflake/snowflake-arctic-instruct",
-                           input={"prompt": prompt_str,
-                                  "prompt_template": r"{prompt}",
-                                  "temperature": 0.1,
-                                  "top_p": 1,
-                                  }):
-        yield str(event)
-
-def replace_ingredient(ingredient):
+def replace_ingredient(ingredient: str):
     # Make new input and remove old one
     prev_user_input = st.session_state.messages[-2]
 
@@ -338,38 +231,13 @@ def replace_ingredient(ingredient):
     # Generate new response
     generate_display_info()
 
-# Function for generating Snowflake Arctic name
-def generate_arctic_name():
-    prompt = []
-    prompt.append("<|im_start|>system\nThe user will give you a recipe with instructions, please return a fitting name for this recipe, and ensure that your response ONLY includes this name, and nothing else. It doesn't matter whether the recipe is complete or not, just try to create a name.<|im_end|>\n")
-    prompt.append("<|im_start|>user\n" + st.session_state.messages[-1]["content"] + "<|im_end|>")
-
-    prompt.append("<|im_start|>assistant")
-    prompt.append("")
-    prompt_str = "\n".join(prompt)
-
-    if get_num_tokens(prompt_str) >= 3072:
-        st.error("Conversation length too long. Please keep it under 3072 tokens.")
-        st.button('Clear chat', on_click=clear_chat_history, key="clear_chat_history", type="primary")
-        st.stop()
-
-    for event in replicate.stream("snowflake/snowflake-arctic-instruct",
-                           input={"prompt": prompt_str,
-                                  "prompt_template": r"{prompt}",
-                                  "temperature": 0.1,
-                                  "top_p": 1,
-                                  }):
-        yield str(event)
-
 # saves given recipe into session state
-# recipe parameter: recipe object (defined near the top of the file)
-def save_recipe(recipe):
+# recipe parameter: recipe object (defined in the Recipe.py file)
+def save_recipe(recipe: Recipe):
     if "recipes" not in st.session_state:
         st.session_state.recipes = []
 
     st.session_state.recipes.append(recipe)
-    for recipe in st.session_state.recipes:
-        print(recipe)
 
 # clears all saved recipes, if any are saved
 def clear_recipes():
@@ -379,14 +247,12 @@ def clear_recipes():
 # Generates the regular response and the ingredients list
 def generate_display_info():
     global INDEX
+
     with container:
         with st.chat_message("assistant", avatar=icons["assistant"]):
-            # ingredients_response = generate_arctic_ingredients_response()
             ingredients_response = generate_arctic_response(DEFAULT_INGREDIENTS_PROMPT[INDEX], temperature, top_p, True)
-            # method_response = generate_arctic_method_response()
             method_response = generate_arctic_response(DEFAULT_METHOD_PROMPT[INDEX], temperature, top_p, False)
 
-            # name_msg = generate_arctic_name()
             name_msg = generate_arctic_response(DEFAULT_NAME_PROMPT, 0.1, 1, False)
             name = "".join(list(name_msg)).split("\n\n")[-1]
 
@@ -407,13 +273,11 @@ def generate_display_info():
             st.session_state.messages.append(message)
 
             # Get all the ingredients needed and put them into a list
-            # ingredients_msg = generate_arctic_ingredients()
             ingredients_msg = generate_arctic_response(DEFAULT_INGREDIENTS_LIST_PROMPT, 0.1, 1, False)
-            ingredients = "".join(list(ingredients_msg)).split("\n\n")[-1]  # This stops any overflow from previous responses
-            ingredients_list = ingredientregex.sub("", ingredients).strip(" ").split(", ")
+            ingredients_list = "".join(list(ingredients_msg))[1:].split(", ")
 
             # Make everything capitalized to stop issues and format nicer
-            ingredient_list = [i.capitalize() for i in ingredients_list]
+            ingredient_list = [i.split(" (")[0].capitalize() for i in ingredients_list]
 
             # Check if all the ingredients are actually valid
             ingredients_list = []
@@ -423,7 +287,7 @@ def generate_display_info():
 
             st.button("Save recipe", type="secondary", key="save", on_click=lambda recipe=Recipe(name, ingredients_list, method_response, full_response): save_recipe(recipe))
 
-            if mode_index == 1:
+            if MODE_INDEX == 1:
                 # Show the replace ingredients list
                 num_cols = 3
                 with st.expander("Replace ingredient:"):
@@ -434,15 +298,12 @@ def generate_display_info():
                         index += 1
 
 # User-provided prompt
-prompt = st.chat_input(disabled=not replicate_api, placeholder="Enter your ingredients here")
+prompt = st.chat_input(disabled=not replicate_api, placeholder=CHAT_INPUT_HINTS[MODE_INDEX])
 if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     with container:
         with st.chat_message("user", avatar=icons["user"]):
             st.write(prompt)
-
-# Regex for getting just ingredients
-ingredientregex = re.compile("[^a-zA-Z, \r\n]")       # https://stackoverflow.com/a/22521156
 
 # Generate a new response if last message is not from assistant
 if st.session_state.messages[-1]["role"] != "assistant":

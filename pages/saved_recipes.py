@@ -94,7 +94,7 @@ with open("resources/ingredients_list.txt", mode="r") as file:
 
 # adapted from https://www.geeksforgeeks.org/quick-sort/
 # Function to find the partition position
-def partition(array, low, high):
+def partition(array: list, low: int, high: int, sort_option: str):
 
     # Choose the rightmost element as pivot
     pivot = array[high]
@@ -104,9 +104,16 @@ def partition(array, low, high):
 
     # Traverse through all elements
     # compare each element with pivot
+    condition = False
     for j in range(low, high):
-        if array[j].num_of_ingredients <= pivot.num_of_ingredients:
+        if sort_option == "num_of_ingredient":
+            if array[j].num_of_ingredients <= pivot.num_of_ingredients:
+                condition = True
+        elif sort_option == "alphabetical":
+            if array[j].name <= pivot.name:
+                condition = True
 
+        if condition:
             # If element smaller than pivot is found
             # swap it with the greater element pointed by i
             i = i + 1
@@ -123,23 +130,26 @@ def partition(array, low, high):
 
 # adapted from https://www.geeksforgeeks.org/quick-sort/
 # Function to perform quicksort
-def quicksort(array, low, high):
+def quicksort(array: list, low: int, high: int, sort_option: str):
     if low < high:
 
         # Find pivot element such that
         # element smaller than pivot are on the left
         # element greater than pivot are on the right
-        pi = partition(array, low, high)
+        pi = partition(array, low, high, sort_option)
 
         # Recursive call on the left of pivot
-        quicksort(array, low, pi - 1)
+        quicksort(array, low, pi - 1, sort_option)
 
         # Recursive call on the right of pivot
-        quicksort(array, pi + 1, high)
+        quicksort(array, pi + 1, high, sort_option)
 
 # use quicksort to sort recipe list by number of ingredients
 def sort_by_ingredients():
-    quicksort(st.session_state.recipes, 0, len(st.session_state.recipes) - 1)
+    quicksort(st.session_state.recipes, 0, len(st.session_state.recipes) - 1, "num_of_ingredients")
+# use quicksort to sort recipe list alphabetically
+def sort_by_alphabetical():
+    quicksort(st.session_state.recipes, 0, len(st.session_state.recipes) - 1, "alphabetical")
 
 # create container for saved recipe viewer section
 viewing_container = st.container()
@@ -149,6 +159,9 @@ with viewing_container:
     else:
         if sort == "Number of ingredients":
             sort_by_ingredients()
+        elif sort == "Alphabetical":
+            sort_by_alphabetical()
+
         for recipe in st.session_state.recipes:
             with st.expander(recipe.name):
                 st.header(recipe.name)

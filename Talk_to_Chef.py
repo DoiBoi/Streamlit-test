@@ -251,7 +251,8 @@ def generate_display_info():
 
     with container:
         with st.chat_message("assistant", avatar=icons["assistant"]):
-            st.write("Generating...")
+            element = st.empty()
+            element.markdown("Generating...")
 
             # Ingredient generation
             ingredients_response = generate_arctic_response(DEFAULT_INGREDIENTS_PROMPT[INDEX], temperature, top_p, True)
@@ -285,8 +286,9 @@ def generate_display_info():
             name = "".join(list(name_reponse)).split("\n\n")[-1]
 
             # Display recipe
-            st.empty()
-            st.header(name)
+            # st.empty()
+            # st.header(name)
+            element.header(name)
 
             icol, mcol = st.columns(2)
             with icol:

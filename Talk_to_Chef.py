@@ -288,6 +288,7 @@ def generate_display_info():
             # Display recipe
             # st.empty()
             # st.header(name)
+            element = st.empty()
             element.header(name)
 
             icol, mcol = st.columns(2)

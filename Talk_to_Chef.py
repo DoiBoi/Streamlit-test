@@ -121,15 +121,27 @@ with st.sidebar:
     if "personality_option" not in st.session_state.keys():
         st.session_state.personality_option = 0
 
-    option = st.selectbox('Please select a chef:', CHEF_LIST, index=st.session_state.personality_option, help="This determines what personality the chat bot has when creating recipes.", on_change=set_person_from_key, key = "personality_index")
+    option = st.selectbox('Please select a chef:',
+                          CHEF_LIST,
+                          index=st.session_state.personality_option,
+                          help="This determines what personality the chat bot has when creating recipes.",
+                          on_change=set_person_from_key,
+                          key = "personality_index")
 
     # Mode selection
     if "mode_option" not in st.session_state.keys():
         st.session_state.mode_option = 0
 
-    mode = st.radio("Select a mode", MODE_LIST, index=st.session_state.mode_option, on_change=set_mode_from_key, key="mode_index")
+    mode = st.radio("Select a mode",
+                    MODE_LIST,
+                    index=st.session_state.mode_option,
+                    on_change=set_mode_from_key,
+                    key="mode_index")
 
-    st.button("Reset options", on_click=reset_options, type="secondary", use_container_width=True)
+    st.button("Reset options",
+              on_click=reset_options,
+              type="secondary",
+              use_container_width=True)
 
     col1, col2 = st.columns(2)
     clear_chat = col1.button("Clear chat", type="primary", use_container_width=True)

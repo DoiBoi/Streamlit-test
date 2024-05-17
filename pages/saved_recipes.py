@@ -1,9 +1,6 @@
-import os               # For opening external text files
 import random           # For widget key generation
-import replicate        # For accessing AI model API
 import string           # For widget key generation
 import streamlit as st  # For website generation
-from transformers import AutoTokenizer
 
 st.set_page_config(
     page_title="Saved Recipes - Chef Chat",
@@ -25,6 +22,8 @@ def reset_options():
         "sort by": 0
         }
 
+    st.session_state.time_filter = (0, 120)
+
 def delete_all_recipes():
     if "recipes" in st.session_state:
         st.session_state.recipes = []
@@ -34,6 +33,16 @@ def remove_recipe(name: str):
         if recipe.name == name:
             st.session_state.recipes.pop(index)
             break
+
+def set_veg_from_key():
+    st.session_state.filters["veg"] = st.session_state.veg_filter
+def set_dairy_from_key():
+    st.session_state.filters["dairy"] = st.session_state.dairy_filter
+def set_time_from_key():
+    st.session_state.filters["min_time"] = st.session_state.time_filter[0]
+    st.session_state.filters["max_time"] = st.session_state.time_filter[1]
+def set_sort_from_key():
+    st.session_state.filters["sort by"] = SORT_OPTIONS.index(st.session_state.sort_by)
 
 # Create sidebar
 with st.sidebar:
@@ -56,22 +65,28 @@ with st.sidebar:
             "sort by": 0
             }
 
-    veg = st.checkbox("Non-vegetarian", value=st.session_state.filters["veg"], key="veg_filter")
-    dairy = st.checkbox("Dairy", value=st.session_state.filters["dairy"], key="dairy_filter")
+    veg = st.checkbox("Non-vegetarian",
+                      value=st.session_state.filters["veg"],
+                      on_change=set_veg_from_key,
+                      key="veg_filter")
+    dairy = st.checkbox("Dairy",
+                        value=st.session_state.filters["dairy"],
+                        on_change=set_dairy_from_key,
+                        key="dairy_filter")
     min_time, max_time = st.select_slider("Total preparation & cook time (minutes)",
                                           options=[i for i in range(0, 121, 5)],
-                                          value=[st.session_state.filters["min time"], st.session_state.filters["max time"]],
+                                          value=[st.session_state.filters["min time"],
+                                                 st.session_state.filters["max time"]],
+                                          on_change=set_time_from_key,
                                           key="time_filter")
 
-    st.session_state.filters["veg"] = veg
-    st.session_state.filters["dairy"] = dairy
-    st.session_state.filters["min time"] = min_time
-    st.session_state.filters["max time"] = max_time
-
     st.subheader("Sort by")
-    sort = st.radio("Sort by", options=SORT_OPTIONS, index=st.session_state.filters["sort by"], label_visibility="collapsed", key="sort_by")
-
-    st.session_state.filters["sort by"] = SORT_OPTIONS.index(sort)
+    sort = st.radio("Sort by",
+                    options=SORT_OPTIONS,
+                    index=st.session_state.filters["sort by"],
+                    label_visibility="collapsed",
+                    on_change=set_sort_from_key,
+                    key="sort_by")
 
     st.button("Reset filters", type="secondary", on_click=reset_options, use_container_width=True)
 

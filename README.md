@@ -17,7 +17,7 @@ Technologies used:
 
 ---
 
-### Preview
+# Preview
 
 ## Finding Recipes Given Available Ingredients
 

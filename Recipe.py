@@ -44,15 +44,15 @@ class Recipe:
         pdf.add_page()
 
         # Title
-        pdf.set_font('Helvetica', size=24, style="BI")
+        pdf.set_font('arial', size=24, style="BI")
         pdf.multi_cell(text=self.name, w=190, padding=5, new_x="LEFT", new_y="NEXT", markdown=True)
 
         # Main body
         column_width = 190/2
-        pdf.set_font('Helvetica', size=18, style="B")
+        pdf.set_font('arial', size=18, style="B")
         pdf.multi_cell(text="Ingredients", w=column_width, new_x="RIGHT", new_y="TOP", padding=3)
         pdf.multi_cell(text="Method", w=column_width, new_x="LMARGIN", new_y="NEXT", padding=3)
-        pdf.set_font('Helvetica', size=11, style="")
+        pdf.set_font('arial', size=11, style="")
         pdf.multi_cell(w=column_width, h=5, new_x="RIGHT", new_y="TOP", text=ingredients, markdown=True)
         pdf.multi_cell(w=column_width, h=5, new_x="LEFT", new_y="TOP", text=instructions, markdown=True)
 

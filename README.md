@@ -19,7 +19,25 @@ Technologies used:
 
 ### Preview
 
-Add preview here
+## Finding Recipes Given Available Ingredients
+
+<img width="1139" alt="find by available ingredients" src="resources/previews/findingredients.png">
+
+## Finding Recipes Given Recipe Name
+
+<img width="1139" alt="find by recipe" src="resources/previews/findrecipe1.png">
+
+## Saving or Swapping out Ingredients
+
+<img width="1139" alt="save recipe" src="resources/previews/findrecipe2.png">
+
+## Viewing Saved Recipes
+
+<img width="1139" alt="find by available ingredients" src="resources/previews/saved_recipe1.png">
+
+## Saving Saved Recipes into PDF
+
+<img width="1139" alt="find by available ingredients" src="resources/previews/saved_recipe2.png">
 
 ---
 
